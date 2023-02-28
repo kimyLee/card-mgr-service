@@ -24,6 +24,5 @@
     // 自动添加头部注释黑名单
     "prohibitAutoAdd": ["json"]
     //  "prohibitItemAutoAdd": [ "项目的全称禁止项目自动添加头部注释, 使用快捷键自行添加" ],
-  },
-  "cSpell.words": ["nestjs"]
+  }
 }
