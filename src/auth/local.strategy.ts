@@ -1,8 +1,11 @@
 import { PassportStrategy } from '@nestjs/passport';
 
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
 import { AuthService } from './auth.service';
+import { UserStatusEnum } from '@/user/models/create-user.dto';
+import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
+import { AppError } from '@/common/error/AppError';
 
 // import { ContextIdFactory, ModuleRef } from '@nestjs/core';  // 动态范围写法
 
@@ -28,8 +31,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
     const user = await this.authService.validateUser(username, password);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new AppError(AppErrorTypeEnum.USER_NOT_FOUND);
     }
+
+    if (user.status !== UserStatusEnum.YES) {
+      throw new AppError(AppErrorTypeEnum.USER_FORBIDDEN);
+    }
+
     return user;
   }
 }

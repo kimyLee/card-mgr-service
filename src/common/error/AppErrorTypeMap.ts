@@ -7,32 +7,39 @@ interface AppErrorType {
 
 /** 错误枚举 */
 export const enum AppErrorTypeEnum {
-  USER_NOT_FOUND,
-  USER_EXISTS,
-  NOT_IN_SESSION,
-  /** 用户不存在 */
-  NO_USERS_IN_DB,
   /** 数据验证失败 */
-  VALIDATOR_ERROR,
+  VALIDATOR_ERROR = 400,
+
+  /** 用户 */
+  USER_NOT_FOUND = 10001,
+  USER_EXISTS,
+  NO_USERS_IN_DB,
+  NOT_MODIFY_SUP,
+  USER_FORBIDDEN,
 }
 
 /** 错误枚举 */
 const AppErrorTypeMap: AppErrorType = {
+  [AppErrorTypeEnum.VALIDATOR_ERROR]: {
+    errorMessage: 'Validation failed',
+    httpStatus: 400,
+  },
   [AppErrorTypeEnum.USER_NOT_FOUND]: {
     errorMessage: 'User not found',
   },
   [AppErrorTypeEnum.USER_EXISTS]: {
     errorMessage: 'User exists',
   },
-  [AppErrorTypeEnum.NOT_IN_SESSION]: {
-    errorMessage: 'No Session',
-  },
   [AppErrorTypeEnum.NO_USERS_IN_DB]: {
     errorMessage: 'No User exits in the database',
   },
-  [AppErrorTypeEnum.VALIDATOR_ERROR]: {
-    errorMessage: 'Validation failed',
-    httpStatus: 400,
+
+  [AppErrorTypeEnum.NOT_MODIFY_SUP]: {
+    errorMessage: 'No modify super account',
+  },
+
+  [AppErrorTypeEnum.USER_FORBIDDEN]: {
+    errorMessage: 'use forbidden',
   },
 };
 

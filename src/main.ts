@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-02-28 04:58:01
+ * @LastEditTime: 2023-03-01 21:37:56
  * @Description:
  *
  */
@@ -10,6 +10,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonModule } from 'nest-winston';
 import {
   DocumentBuilder,
+  SwaggerCustomOptions,
   SwaggerDocumentOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
@@ -57,10 +58,19 @@ async function bootstrap() {
     .addBearerAuth({ type: 'http', bearerFormat: 'JWT', scheme: 'bearer' })
     .build();
   const options: SwaggerDocumentOptions = {
+    // 去掉 moduleController 前缀
     operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
   };
   const document = SwaggerModule.createDocument(app, config, options);
-  SwaggerModule.setup('api', app, document);
+
+  const customOptions: SwaggerCustomOptions = {
+    swaggerOptions: {
+      // 刷新页面后保留身份验证令牌
+      persistAuthorization: true,
+    },
+  };
+
+  SwaggerModule.setup('api', app, document, customOptions);
 
   /* 设置接口请求频率 */
   app.use(

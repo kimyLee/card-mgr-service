@@ -1,9 +1,9 @@
-import { UserEntity } from '../user/user.entity';
 import * as crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from '@/user/user.service';
+import { UserEntity } from '@/user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -24,12 +24,7 @@ export class AuthService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   login(user: UserEntity) {
-    if (user.status !== 1) {
-      throw new Error('用户已停用');
-    }
-
     const payload = { username: user.username, sub: user.id, role: user.role };
     return {
       /* @nest-jwt 提供的, 用于从用户对象属性的子集生成 jwt，然后以简单对象的形式返回一个 access_token 属性 */

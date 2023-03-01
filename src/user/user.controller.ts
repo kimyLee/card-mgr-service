@@ -1,3 +1,4 @@
+import { AppError } from './../common/error/AppError';
 import {
   Body,
   Controller,
@@ -9,18 +10,19 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiSecurity, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+
+import { Roles } from '@/common/decorators/roles.decorator';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { CurrentUser } from '@/common/decorators/user.decorator';
 
 import { UserService } from './user.service';
 import { UserEntity } from './user.entity';
 import { CreateUserDto } from './models/create-user.dto';
 import { UpdatePasswordDto } from './models/update-password.dto';
-
-import { Roles } from '@/common/decorators/roles.decorator';
-import { RolesGuard } from '@/common/guards/roles.guard';
-import { PaginatedDto } from '@/common/models/pagination.dto';
-import { CurrentUser } from '@/common/decorators/user.decorator';
+import { UsersPaginatedDto } from './models/users-pagination.dto';
+import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
 
 @Controller('api/user')
 @ApiTags('user')
@@ -30,8 +32,8 @@ export class UserController {
   @Get('/current')
   @UseGuards(AuthGuard())
   @ApiSecurity('bearer')
-  @ApiOperation({ summary: '获取当前账号信息' })
-  QueryCurrentUser(@CurrentUser() userId: number): Promise<UserEntity> {
+  @ApiOperation({ summary: '获取当前用户信息' })
+  QueryCurrentUser(@CurrentUser() userId: number): Promise<any> {
     return this.usersService.queryUser(userId);
   }
 
@@ -39,37 +41,26 @@ export class UserController {
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '创建账号' }) // 超级管理员才能创建账号
-  CreateUser(@Body() createUserDto: CreateUserDto): Promise<UserEntity> {
+  @ApiOperation({ summary: '创建用户' }) // 超级管理员才能创建用户
+  CreateUser(@Body() createUserDto: CreateUserDto): Promise<any> {
     return this.usersService.createUser(createUserDto);
   }
 
-  @Get()
+  @Get('/list')
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '获取账号列表' })
-  @ApiQuery({
-    required: false,
-    name: 'search',
-  })
-  @ApiQuery({
-    required: false,
-    name: 'search1',
-  })
-  QueryAllUsers(
-    @Query() pagination: PaginatedDto,
-    // @Query() search?: string,
-  ): Promise<UserEntity[]> {
-    return this.usersService.queryAllUsers(pagination, '');
+  @ApiOperation({ summary: '获取用户列表' })
+  QueryAllUsers(@Query() usersPaginatedDto: UsersPaginatedDto): Promise<any> {
+    return this.usersService.queryAllUsers(usersPaginatedDto);
   }
 
   @Get(':id')
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '查找账号' })
-  QueryUser(@Param('id') id: number): Promise<UserEntity> {
+  @ApiOperation({ summary: '查找用户' })
+  QueryUser(@Param('id') id: number): Promise<any> {
     return this.usersService.queryUser(id);
   }
 
@@ -77,16 +68,16 @@ export class UserController {
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '修改账号' })
+  @ApiOperation({ summary: '修改用户' })
   DeleteUser(
     @Param('id') id: number,
     @CurrentUser() userId: number,
   ): Promise<any> {
     if (id === 1) {
-      throw new Error('不能删除初始超管账号');
+      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
     }
     if (userId === id) {
-      throw new Error('不能删除当前登录的账号');
+      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
     }
     return this.usersService.deleteUser(id);
   }
@@ -95,10 +86,10 @@ export class UserController {
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '删除账号' })
+  @ApiOperation({ summary: '修改用户角色' })
   UpdateUserRole(@Param('id') id: number): Promise<any> {
     if (id === 1) {
-      throw new Error('不能修改初始超管账号的角色权限');
+      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
     }
     return this.usersService.updateUserRole(id);
   }
@@ -106,7 +97,7 @@ export class UserController {
   @Put('/update_password')
   @UseGuards(AuthGuard())
   @ApiSecurity('bearer')
-  @ApiOperation({ summary: '更新账号密码' })
+  @ApiOperation({ summary: '更新用户密码' })
   UpdatePassword(
     @CurrentUser() userId: number,
     @Body() updatePasswordDto: UpdatePasswordDto,
@@ -118,10 +109,10 @@ export class UserController {
   @Roles('ADMIN')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiSecurity('bearer')
-  @ApiOperation({ summary: '启用/停用账号' })
+  @ApiOperation({ summary: '启用/停用用户' })
   UpdateUserStatus(@Param('id') id: number): Promise<any> {
     if (id === 1) {
-      throw new Error('不能修改初始超管账号的状态');
+      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
     }
     return this.usersService.updateUserStatus(id);
   }

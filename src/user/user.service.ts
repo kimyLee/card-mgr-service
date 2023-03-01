@@ -4,13 +4,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Like, Repository } from 'typeorm';
 
-import { PaginatedDto } from '@/common/models/pagination.dto';
-
 import { CreateUserDto } from './models/create-user.dto';
 import { UserEntity } from './user.entity';
 import { UpdatePasswordDto } from './models/update-password.dto';
 
 import { RoleEnum, UserStatusEnum } from './models/create-user.dto';
+import { UsersPaginatedDto } from './models/users-pagination.dto';
 @Injectable()
 export class UserService {
   constructor(
@@ -28,7 +27,7 @@ export class UserService {
     return this.usersRepository.save(user);
   }
 
-  /** 创建 超级管理 初始账号 */
+  /** 创建初始超级管理用户 */
   async createInitSuperUser(): Promise<any> {
     const username = this.configService.get<string>(
       'accountConfig.superAccountName',
@@ -67,12 +66,12 @@ export class UserService {
   }
 
   /**
-   * @param pagination PaginatedDto
-   * @param search: 模糊搜索
+   * @param usersPaginatedDto UsersPaginatedDto
    */
-  async queryAllUsers(pagination: PaginatedDto, search?: string): Promise<any> {
+  async queryAllUsers(usersPaginatedDto: UsersPaginatedDto): Promise<any> {
     let findWhere: any = {};
 
+    const { search, pageSize, current } = usersPaginatedDto;
     if (typeof search === 'string') {
       findWhere = [
         {
@@ -90,17 +89,18 @@ export class UserService {
     const [data, total] = await this.usersRepository.findAndCount({
       select: ['id', 'username', 'role', 'status', 'createdAt', 'updatedAt'],
       where: findWhere,
-      take: pagination.pageSize,
-      skip: (pagination.current - 1) * pagination.pageSize,
-      order: {
-        createdAt: 'DESC',
-      },
+      take: pageSize,
+      skip: (current - 1) * pageSize,
+      // order: {
+      //   createdAt: 'DESC',
+      // },
     });
 
     return {
-      data,
+      list: data,
       pagination: {
-        ...pagination,
+        current,
+        pageSize,
         total: total,
       },
     };
