@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-02-28 03:34:19
+ * @LastEditTime: 2023-03-06 08:50:41
  * @Description:
  *
  */
@@ -11,16 +11,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { WinstonModule } from 'nest-winston';
 
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
 import appConfig from './config';
 import loggerOptions from './common/logger';
 import { LoggerOptions } from 'typeorm/logger/LoggerOptions';
+
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -67,7 +69,7 @@ import { PassportModule } from '@nestjs/passport';
     // }),
 
     AuthModule,
-    UserModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

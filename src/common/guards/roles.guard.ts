@@ -14,7 +14,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { RoleEnum } from '@/user/models/create-user.dto';
+import { RoleEnum } from '@/users/dto/create-user.dto';
 
 /**
  * 获取用户信息, 更可以进行权限拦截(如果用户不是超级管理员)

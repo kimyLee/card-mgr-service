@@ -1,37 +1,55 @@
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import * as crypto from 'crypto';
-import BaseEntity from '@/baseEntity';
-import { RoleEnum, UserStatusEnum } from './models/create-user.dto';
-import { ApiHideProperty } from '@nestjs/swagger';
+import BaseEntity from '@/common/entities/baseEntity';
+import { RoleEnum, UserStatusEnum } from '../dto/create-user.dto';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
+  @ApiProperty({
+    description: '自增id',
+  })
   @PrimaryGeneratedColumn()
-  public id: number;
+  id: number;
 
+  @ApiProperty({
+    description: '用户名,不可重复',
+  })
   @Column({
     length: 50,
     unique: true,
   })
-  public username: string;
+  username: string;
 
+  @ApiProperty({
+    description: '头像',
+  })
   @Column({
     comment: '头像',
     default: '',
   })
-  public avatar: string;
+  avatar: string;
 
   @Column({
     comment: '状态, 1: enable, 0: disable',
     default: UserStatusEnum.YES,
+    type: 'int',
   })
-  public status: number;
+  @ApiProperty({
+    description: '账号启用状态, 1: enable, 0: disable',
+  })
+  status: UserStatusEnum;
 
+  @ApiProperty({
+    description: '角色类型, 1: admin， 2: user',
+  })
   @Column({
     comment: '角色, 1: admin, 2: user',
     default: RoleEnum.USER,
+    type: 'int',
   })
-  public role: number;
+  role: RoleEnum;
 
   @Column({
     length: 250,
@@ -41,7 +59,8 @@ export class UserEntity extends BaseEntity {
     name: 'password',
   })
   @ApiHideProperty()
-  public password_hash: string;
+  @Exclude()
+  password_hash: string;
 
   /**
    * TypeScript setter to automatically hash the password when the password property is set.

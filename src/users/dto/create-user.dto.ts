@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, IsEnum, ValidateIf } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsEnum,
+  ValidateIf,
+  IsUrl,
+} from 'class-validator';
 
 /*  用户启用状态 */
 export enum UserStatusEnum {
@@ -42,4 +48,13 @@ export class CreateUserDto {
     return value && !isNaN(value) ? parseInt(value, 10) : RoleEnum.USER;
   })
   readonly role: RoleEnum;
+
+  @ApiProperty({
+    description: '头像url',
+    example: '',
+    default: '',
+  })
+  @ValidateIf((value) => !!value.avatar)
+  @IsUrl()
+  readonly avatar?: string;
 }

@@ -1,29 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
+import { AppError } from '@/common/error/AppError';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { ConfigService } from '@nestjs/config';
 import { Like, Repository } from 'typeorm';
 
-import { CreateUserDto } from './models/create-user.dto';
-import { UserEntity } from './user.entity';
-import { UpdatePasswordDto } from './models/update-password.dto';
+import { UserEntity } from './entities/user.entity';
 
-import { RoleEnum, UserStatusEnum } from './models/create-user.dto';
-import { UsersPaginatedDto } from './models/users-pagination.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { RoleEnum, UserStatusEnum } from './dto/create-user.dto';
+import { UsersPaginatedDto } from './dto/users-pagination.dto';
 @Injectable()
-export class UserService {
+export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
     private configService: ConfigService,
-  ) {
+  ) {}
+  onModuleInit() {
     this.createInitSuperUser();
   }
 
   /** 创建新用户 */
-  createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async createUser(createUserDto: CreateUserDto): Promise<any> {
     const user = new UserEntity();
     Object.assign(user, createUserDto);
+
+    const isExist = await this.findOneByUserName(user.username);
+    if (isExist) {
+      throw new AppError(AppErrorTypeEnum.USER_EXISTS);
+    }
     return this.usersRepository.save(user);
   }
 
@@ -58,11 +66,7 @@ export class UserService {
     });
     const user = new UserEntity();
     Object.assign(user, userInfo, updatePasswordDto);
-    const { affected } = await this.usersRepository.update(userId, user);
-    if (affected > 0)
-      return this.usersRepository.findOne({
-        where: { id: userId },
-      });
+    await this.usersRepository.update(userId, user);
   }
 
   /**
@@ -87,17 +91,16 @@ export class UserService {
     }
 
     const [data, total] = await this.usersRepository.findAndCount({
-      select: ['id', 'username', 'role', 'status', 'createdAt', 'updatedAt'],
       where: findWhere,
       take: pageSize,
       skip: (current - 1) * pageSize,
       // order: {
-      //   createdAt: 'DESC',
+      //   created_at: 'DESC',
       // },
     });
 
     return {
-      list: data,
+      results: data,
       pagination: {
         current,
         pageSize,
@@ -110,7 +113,7 @@ export class UserService {
    *
    * @param id 用户的ID
    */
-  queryUser(id: number): Promise<UserEntity> {
+  queryUser(id: number): Promise<any> {
     return this.usersRepository.findOne({
       where: {
         id,
@@ -118,21 +121,14 @@ export class UserService {
     });
   }
 
-  findOneByUserName(username: string): Promise<UserEntity> {
-    return this.usersRepository.findOne({
-      select: ['password_hash', 'username', 'id', 'status', 'role'],
-      where: { username },
-    });
-  }
-
-  async deleteUser(id: number): Promise<void> {
-    await this.usersRepository.softDelete(id);
-  }
-
-  async updateUserRole(id: number): Promise<UserEntity> {
+  async updateUserRole(id: number): Promise<any> {
     const userInfo = await this.usersRepository.findOne({
       where: { id },
     });
+    if (!userInfo) {
+      throw new AppError(AppErrorTypeEnum.USER_NOT_FOUND);
+    }
+
     switch (userInfo.role) {
       case RoleEnum.USER:
         userInfo.role = RoleEnum.ADMIN;
@@ -143,17 +139,18 @@ export class UserService {
     }
     const user = new UserEntity();
     Object.assign(user, userInfo);
-    const { affected } = await this.usersRepository.update(id, user);
-    if (affected > 0)
-      return this.usersRepository.findOne({
-        where: { id },
-      });
+    await this.usersRepository.update(id, user);
   }
 
-  async updateUserStatus(id: number): Promise<UserEntity> {
+  async updateUserStatus(id: number): Promise<any> {
     const userInfo = await this.usersRepository.findOne({
       where: { id },
     });
+
+    if (!userInfo) {
+      throw new AppError(AppErrorTypeEnum.USER_NOT_FOUND);
+    }
+
     switch (userInfo.status) {
       case UserStatusEnum.YES:
         userInfo.status = UserStatusEnum.NO;
@@ -164,10 +161,20 @@ export class UserService {
     }
     const user = new UserEntity();
     Object.assign(user, userInfo);
-    const { affected } = await this.usersRepository.update(id, user);
-    if (affected > 0)
-      return this.usersRepository.findOne({
-        where: { id },
-      });
+    await this.usersRepository.update(id, user);
+  }
+
+  async deleteUser(id: number): Promise<any> {
+    const { affected } = await this.usersRepository.softDelete(id);
+    if (affected <= 0) {
+      throw new AppError(AppErrorTypeEnum.USER_NOT_FOUND);
+    }
+  }
+
+  findOneByUserName(username: string): Promise<UserEntity> {
+    return this.usersRepository.findOne({
+      select: ['password_hash', 'username', 'id', 'status', 'role'],
+      where: { username },
+    });
   }
 }

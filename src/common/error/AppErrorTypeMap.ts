@@ -15,6 +15,7 @@ export const enum AppErrorTypeEnum {
   USER_EXISTS,
   NO_USERS_IN_DB,
   NOT_MODIFY_SUP,
+  NOT_MODIFY_CURRENT,
   USER_FORBIDDEN,
 }
 
@@ -35,7 +36,11 @@ const AppErrorTypeMap: AppErrorType = {
   },
 
   [AppErrorTypeEnum.NOT_MODIFY_SUP]: {
-    errorMessage: 'No modify super account',
+    errorMessage: 'No modify super user',
+  },
+
+  [AppErrorTypeEnum.NOT_MODIFY_CURRENT]: {
+    errorMessage: 'No modify current user',
   },
 
   [AppErrorTypeEnum.USER_FORBIDDEN]: {

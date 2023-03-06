@@ -2,13 +2,13 @@ import * as crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { UserService } from '@/user/user.service';
-import { UserEntity } from '@/user/user.entity';
+import { UsersService } from '@/users/users.service';
+import { UserEntity } from '@/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UserService,
+    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -24,7 +24,7 @@ export class AuthService {
     }
   }
 
-  login(user: UserEntity) {
+  login(user: UserEntity): any {
     const payload = { username: user.username, sub: user.id, role: user.role };
     return {
       /* @nest-jwt 提供的, 用于从用户对象属性的子集生成 jwt，然后以简单对象的形式返回一个 access_token 属性 */
