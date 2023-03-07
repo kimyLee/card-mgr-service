@@ -5,7 +5,7 @@ import * as crypto from 'crypto';
 import BaseEntity from '@/common/entities/baseEntity';
 import { RoleEnum, UserStatusEnum } from '../dto/create-user.dto';
 
-@Entity({ name: 'user' })
+@Entity({ name: 'users' })
 export class UserEntity extends BaseEntity {
   @ApiProperty({
     description: '自增id',

@@ -24,13 +24,6 @@ import { CurrentUser } from '@/common/decorators/user.decorator';
 import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
 import { AppError } from '@/common/error/AppError';
 import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
-
-import { UsersService } from './users.service';
-import { UserEntity } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
-import { UsersPaginatedDto } from './dto/users-pagination.dto';
-import { CurrentUserDto } from './dto/current-user.dto';
 import {
   ResponseDto,
   ResponseObjDto,
@@ -39,6 +32,13 @@ import {
   ResponsePaginatedDto,
 } from '@/common/dto/response.dto';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
+
+import { UsersService } from './users.service';
+import { UserEntity } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UsersPaginatedDto } from './dto/users-pagination.dto';
+import { CurrentUserDto } from './dto/current-user.dto';
 
 @Controller('api/users')
 @ApiTags('users')
@@ -73,7 +73,7 @@ export class UserController {
     return this.usersService.createUser(createUserDto);
   }
 
-  @Get('')
+  @Get()
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)

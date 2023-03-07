@@ -17,6 +17,12 @@ export const enum AppErrorTypeEnum {
   NOT_MODIFY_SUP,
   NOT_MODIFY_CURRENT,
   USER_FORBIDDEN,
+
+  CARD_NOT_FOUND = 20001,
+
+  POINT_NOT_FOUND = 30001,
+
+  BATCH_NOT_FOUND = 40001,
 }
 
 /** 错误枚举 */
@@ -45,6 +51,18 @@ const AppErrorTypeMap: AppErrorType = {
 
   [AppErrorTypeEnum.USER_FORBIDDEN]: {
     errorMessage: 'use forbidden',
+  },
+
+  [AppErrorTypeEnum.CARD_NOT_FOUND]: {
+    errorMessage: 'card not found',
+  },
+
+  [AppErrorTypeEnum.POINT_NOT_FOUND]: {
+    errorMessage: 'point not found',
+  },
+
+  [AppErrorTypeEnum.BATCH_NOT_FOUND]: {
+    errorMessage: 'batch not found',
   },
 };
 

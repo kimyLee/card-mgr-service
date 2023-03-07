@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-03-06 08:50:41
+ * @LastEditTime: 2023-03-06 09:31:25
  * @Description:
  *
  */
@@ -21,8 +21,12 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import { BatchesModule } from './batches/batches.module';
+import { CardsModule } from './cards/cards.module';
+import { PointsModule } from './points/points.module';
+
+// import { ServeStaticModule } from '@nestjs/serve-static';
+// import { join } from 'path';
 
 @Module({
   imports: [
@@ -70,6 +74,9 @@ import { join } from 'path';
 
     AuthModule,
     UsersModule,
+    BatchesModule,
+    CardsModule,
+    PointsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

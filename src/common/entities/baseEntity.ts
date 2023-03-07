@@ -3,12 +3,12 @@
  * 包含 `created_at`, `updated_at`, `deleteAt` 用于记录时间戳的东西
  * @Author: hsycc
  * @Date: 2023-02-21 13:24:34
- * @LastEditTime: 2023-03-06 08:18:45
+ * @LastEditTime: 2023-03-07 17:32:59
  * @Description:
  *
  */
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import 'reflect-metadata';
 import {
   BeforeInsert,
@@ -40,10 +40,7 @@ export default class BaseEntity {
   })
   public updated_at?: Date;
 
-  @ApiProperty({
-    description: '删除时间',
-    type: Date,
-  })
+  @ApiHideProperty()
   @DeleteDateColumn({
     select: false,
     nullable: true,
