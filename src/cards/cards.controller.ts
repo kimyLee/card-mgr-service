@@ -1,4 +1,3 @@
-import { CardEntity } from './entities/card.entity';
 import {
   Controller,
   Get,
@@ -9,18 +8,23 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import {
+  ApiBody,
+  ApiConsumes,
   ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { Express } from 'express';
 
-import { CardsService } from './cards.service';
-import { CreateCardDto } from './dto/create-card.dto';
-import { UpdateCardDto } from './dto/update-card.dto';
+import * as XLSX from 'xlsx';
+
 import {
   ResponseDto,
   ResponseObjDto,
@@ -29,11 +33,21 @@ import {
   ResponsePaginatedDto,
 } from '@/common/dto/response.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
+import { ApiListResponse } from '@/common/decorators/api-list-response.decorator';
+
+import { CardsService } from './cards.service';
+import { CardEntity } from './entities/card.entity';
+
 import { CardsPaginatedDto } from './dto/cards-pagination.dto';
+import { QueryGroupIpDto } from './dto/query-group-ip.dto';
+import { QueryGroupSeriesDto } from './dto/query-group-series.dto';
+import { CreateCardDto } from './dto/create-card.dto';
+import { UpdateCardDto } from './dto/update-card.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileUploadDto } from './dto/file-upload.dto';
 
 @Controller('api/cards')
 @ApiTags('cards')
@@ -44,6 +58,8 @@ import { CardsPaginatedDto } from './dto/cards-pagination.dto';
   ResponseListDto,
   ResPaginatedDto,
   ResponsePaginatedDto,
+  QueryGroupIpDto,
+  QueryGroupSeriesDto,
 )
 export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
@@ -53,9 +69,32 @@ export class CardsController {
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '导入批次卡牌' })
-  @ApiObjResponse(CardEntity)
-  ImportCards() {
-    return;
+  // @ApiObjResponse(CardEntity)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'List of cards for batch',
+    type: FileUploadDto,
+  })
+  ImportCards(@UploadedFile() file: Express.Multer.File) {
+    console.log(file);
+
+    const workbook = XLSX.read(file.buffer, {
+      type: 'buffer',
+    });
+
+    /* Get the work sheet name */
+    const first_sheet_name = workbook.SheetNames[0];
+
+    /* Get worksheet */
+    const worksheet = workbook.Sheets[first_sheet_name];
+
+    /* Convert it to json*/
+    const xlsData = XLSX.utils.sheet_to_json(worksheet, {
+      raw: true,
+    });
+
+    return xlsData;
   }
 
   @Post('/export_points')
@@ -83,9 +122,9 @@ export class CardsController {
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取 ip group' })
-  // @ApiPaginatedResponse(CardEntity)
+  @ApiListResponse(QueryGroupIpDto)
   QueryGroupIp() {
-    return;
+    return this.cardsService.queryGroupIp();
   }
 
   @Get('get_series_group')
@@ -93,9 +132,9 @@ export class CardsController {
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取 series group' })
-  // @ApiPaginatedResponse(CardEntity)
+  @ApiListResponse(QueryGroupSeriesDto)
   QueryGroupSeries() {
-    return;
+    return this.cardsService.queryGroupSeries();
   }
 
   @Get()
@@ -128,6 +167,18 @@ export class CardsController {
   })
   UpdateCard(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto) {
     return this.cardsService.updateCard(+id, updateCardDto);
+  }
+
+  @Patch('/partner/:id')
+  @Roles('ADMIN')
+  @ApiSecurity('bearer')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @ApiOperation({ summary: '从合作方更新卡牌信息，接口待定' })
+  @ApiOkResponse({
+    type: ResponseDto,
+  })
+  UpdateCardFormPartner(@Param('id') id: string) {
+    // return this.cardsService.updateCard(+id, updateCardDto);
   }
 
   @Delete(':id')

@@ -17,6 +17,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { AuthGuard } from '@nestjs/passport';
+
 import {
   ResPaginatedDto,
   ResponseDto,
@@ -24,16 +26,16 @@ import {
   ResponseObjDto,
   ResponsePaginatedDto,
 } from '@/common/dto/response.dto';
-
-import { BatchesService } from './batches.service';
-import { CreateBatchDto } from './dto/create-batch.dto';
-import { UpdateBatchDto } from './dto/update-batch.dto';
-import { BatchEntity } from './entities/batch.entity';
-import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
+
+import { BatchesService } from './batches.service';
+import { BatchEntity } from './entities/batch.entity';
+
+import { CreateBatchDto } from './dto/create-batch.dto';
+import { UpdateBatchDto } from './dto/update-batch.dto';
 import { BatchesPaginatedDto } from './dto/batches-pagination.dto';
 
 @Controller('api/batches')

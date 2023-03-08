@@ -24,7 +24,7 @@ export class UsersService implements OnModuleInit {
   }
 
   /** 创建新用户 */
-  async createUser(createUserDto: CreateUserDto): Promise<any> {
+  async createUser(createUserDto: CreateUserDto) {
     const user = new UserEntity();
     Object.assign(user, createUserDto);
 
@@ -36,7 +36,7 @@ export class UsersService implements OnModuleInit {
   }
 
   /** 创建初始超级管理用户 */
-  async createInitSuperUser(): Promise<any> {
+  async createInitSuperUser() {
     const username = this.configService.get<string>(
       'accountConfig.superAccountName',
     );
@@ -57,10 +57,7 @@ export class UsersService implements OnModuleInit {
   }
 
   /** 更新用户的密码 */
-  async updatePassword(
-    userId: number,
-    updatePasswordDto: UpdatePasswordDto,
-  ): Promise<any> {
+  async updatePassword(userId: number, updatePasswordDto: UpdatePasswordDto) {
     const userInfo = await this.usersRepository.findOne({
       where: { id: userId },
     });
@@ -72,17 +69,12 @@ export class UsersService implements OnModuleInit {
   /**
    * @param usersPaginatedDto UsersPaginatedDto
    */
-  async queryAllUsers(usersPaginatedDto: UsersPaginatedDto): Promise<any> {
+  async queryAllUsers(usersPaginatedDto: UsersPaginatedDto) {
     let findWhere: any = {};
 
     const { search, pageSize, current } = usersPaginatedDto;
     if (typeof search === 'string') {
       findWhere = [
-        {
-          id: Like(`%${search}%`),
-          ...findWhere,
-        },
-        // or..
         {
           username: Like(`%${search}%`),
           ...findWhere,
@@ -113,7 +105,7 @@ export class UsersService implements OnModuleInit {
    *
    * @param id 用户的ID
    */
-  queryUser(id: number): Promise<any> {
+  queryUser(id: number) {
     return this.usersRepository.findOne({
       where: {
         id,
@@ -121,7 +113,10 @@ export class UsersService implements OnModuleInit {
     });
   }
 
-  async updateUserRole(id: number): Promise<any> {
+  async updateUserRole(id: number) {
+    if (id === 1) {
+      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
+    }
     const userInfo = await this.usersRepository.findOne({
       where: { id },
     });
@@ -129,7 +124,7 @@ export class UsersService implements OnModuleInit {
       throw new AppError(AppErrorTypeEnum.USER_NOT_FOUND);
     }
 
-    switch (userInfo.role) {
+    switch (+userInfo.role) {
       case RoleEnum.USER:
         userInfo.role = RoleEnum.ADMIN;
         break;
@@ -142,7 +137,10 @@ export class UsersService implements OnModuleInit {
     await this.usersRepository.update(id, user);
   }
 
-  async updateUserStatus(id: number): Promise<any> {
+  async updateUserStatus(id: number) {
+    if (id === 1) {
+      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
+    }
     const userInfo = await this.usersRepository.findOne({
       where: { id },
     });
@@ -151,7 +149,7 @@ export class UsersService implements OnModuleInit {
       throw new AppError(AppErrorTypeEnum.USER_NOT_FOUND);
     }
 
-    switch (userInfo.status) {
+    switch (+userInfo.status) {
       case UserStatusEnum.YES:
         userInfo.status = UserStatusEnum.NO;
         break;
@@ -164,14 +162,20 @@ export class UsersService implements OnModuleInit {
     await this.usersRepository.update(id, user);
   }
 
-  async deleteUser(id: number): Promise<any> {
+  async deleteUser(id: number, userId: number) {
+    if (id === 1) {
+      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
+    }
+    if (userId === id) {
+      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_CURRENT);
+    }
     const { affected } = await this.usersRepository.softDelete(id);
     if (affected <= 0) {
       throw new AppError(AppErrorTypeEnum.USER_NOT_FOUND);
     }
   }
 
-  findOneByUserName(username: string): Promise<UserEntity> {
+  findOneByUserName(username: string) {
     return this.usersRepository.findOne({
       select: ['password_hash', 'username', 'id', 'status', 'role'],
       where: { username },

@@ -21,8 +21,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CurrentUser } from '@/common/decorators/user.decorator';
-import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
-import { AppError } from '@/common/error/AppError';
 import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
 import {
   ResponseDto,
@@ -59,7 +57,7 @@ export class UserController {
   @ApiSecurity('bearer')
   @ApiOperation({ summary: '获取当前用户信息' })
   @ApiObjResponse(CurrentUserDto)
-  QueryCurrentUser(@CurrentUser() userId: number): Promise<any> {
+  QueryCurrentUser(@CurrentUser() userId: number) {
     return this.usersService.queryUser(userId);
   }
 
@@ -69,7 +67,7 @@ export class UserController {
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '创建用户' }) // 超级管理员才能创建用户
   @ApiObjResponse(UserEntity)
-  CreateUser(@Body() createUserDto: CreateUserDto): Promise<any> {
+  CreateUser(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
   }
 
@@ -79,7 +77,7 @@ export class UserController {
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取用户列表' })
   @ApiPaginatedResponse(UserEntity)
-  QueryAllUsers(@Query() usersPaginatedDto: UsersPaginatedDto): Promise<any> {
+  QueryAllUsers(@Query() usersPaginatedDto: UsersPaginatedDto) {
     return this.usersService.queryAllUsers(usersPaginatedDto);
   }
 
@@ -89,8 +87,8 @@ export class UserController {
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '查找用户' })
   @ApiObjResponse(UserEntity)
-  QueryUser(@Param('id') id: number): Promise<any> {
-    return this.usersService.queryUser(id);
+  QueryUser(@Param('id') id: string) {
+    return this.usersService.queryUser(+id);
   }
 
   @Patch('/role/:id')
@@ -101,11 +99,8 @@ export class UserController {
   @ApiOkResponse({
     type: ResponseDto,
   })
-  UpdateUserRole(@Param('id') id: number): Promise<any> {
-    if (id === 1) {
-      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
-    }
-    return this.usersService.updateUserRole(id);
+  UpdateUserRole(@Param('id') id: string) {
+    return this.usersService.updateUserRole(+id);
   }
 
   @Patch('/enable/:id')
@@ -116,11 +111,8 @@ export class UserController {
   @ApiOkResponse({
     type: ResponseDto,
   })
-  UpdateUserStatus(@Param('id') id: number): Promise<any> {
-    if (id === 1) {
-      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
-    }
-    return this.usersService.updateUserStatus(id);
+  UpdateUserStatus(@Param('id') id: string) {
+    return this.usersService.updateUserStatus(+id);
   }
 
   @Delete(':id')
@@ -131,17 +123,8 @@ export class UserController {
   @ApiOkResponse({
     type: ResponseDto,
   })
-  DeleteUser(
-    @Param('id') id: number,
-    @CurrentUser() userId: number,
-  ): Promise<any> {
-    if (id === 1) {
-      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_SUP);
-    }
-    if (userId === id) {
-      throw new AppError(AppErrorTypeEnum.NOT_MODIFY_CURRENT);
-    }
-    return this.usersService.deleteUser(id);
+  DeleteUser(@Param('id') id: string, @CurrentUser() userId: number) {
+    return this.usersService.deleteUser(+id, +userId);
   }
 
   @Patch('/update_password')
@@ -154,7 +137,7 @@ export class UserController {
   UpdatePassword(
     @CurrentUser() userId: number,
     @Body() updatePasswordDto: UpdatePasswordDto,
-  ): Promise<any> {
+  ) {
     return this.usersService.updatePassword(userId, updatePasswordDto);
   }
 }

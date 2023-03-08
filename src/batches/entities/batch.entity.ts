@@ -1,6 +1,3 @@
-import { PointEntity } from './../../points/entities/point.entity';
-import BaseEntity from '@/common/entities/baseEntity';
-import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   Entity,
@@ -8,6 +5,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+import { ApiProperty } from '@nestjs/swagger';
+
+import BaseEntity from '@/common/entities/baseEntity';
+import { PointEntity } from '@/points/entities/point.entity';
 
 @Entity({ name: 'batches' })
 export class BatchEntity extends BaseEntity {
@@ -20,6 +22,7 @@ export class BatchEntity extends BaseEntity {
   })
   @Column({
     comment: '批次名',
+    unique: true,
   })
   batch_name: string;
 

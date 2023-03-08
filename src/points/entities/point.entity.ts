@@ -1,6 +1,6 @@
-import BaseEntity from '@/common/entities/baseEntity';
-import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
+import BaseEntity from '@/common/entities/baseEntity';
 
 @Entity({ name: 'points' })
 export class PointEntity extends BaseEntity {
@@ -20,9 +20,11 @@ export class PointEntity extends BaseEntity {
 
   @ApiProperty({
     description: '后台上传状态',
+    default: 0,
   })
   @Column({
     comment: '后台上传状态',
+    nullable: true,
     default: () => 0,
   })
   upload_status: number;

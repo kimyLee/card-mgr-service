@@ -1,4 +1,3 @@
-import { BatchEntity } from './../../batches/entities/batch.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,50 +5,99 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import BaseEntity from '@/common/entities/baseEntity';
 
+import { BatchEntity } from '@/batches/entities/batch.entity';
+
+export enum CardTypeEnum {
+  NEW_ADD = 1,
+  REPRINT = 2,
+}
 @Entity({ name: 'cards' })
 export class CardEntity extends BaseEntity {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'id',
+  })
   @PrimaryGeneratedColumn()
-  public id: number;
+  id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: '卡牌编号',
+  })
   @Column({
     comment: '卡牌编号',
   })
-  public serial: string;
+  serial: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: '卡牌名',
+  })
   @Column({
     comment: '卡牌名',
   })
-  public name: string;
+  name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: '码点值',
+  })
+  @Column({
+    comment: '码点值',
+  })
+  point: number;
+
+  @ApiProperty({
+    description: 'ip',
+  })
   @Column({
     comment: 'ip',
+    nullable: true,
   })
-  public ip: string;
+  ip: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: '系列',
+  })
   @Column({
     comment: '系列',
+    nullable: true,
   })
-  public series: string;
+  series: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: '弹数',
+  })
   @Column({
     comment: '弹数',
+    nullable: true,
   })
-  public amount: string;
+  amount: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: '码点链接',
+  })
   @Column({
     comment: '码点链接',
+    nullable: true,
   })
-  public point_url: number;
+  point_url: string;
+
+  @ApiProperty({
+    description: '类型  1: 新增 ; 2: 复刻',
+  })
+  @Column({
+    comment: '类型  1: 新增 ; 2: 复刻',
+  })
+  type: CardTypeEnum;
+
+  @ApiProperty({
+    description: '备注',
+  })
+  @Column({
+    comment: '备注',
+    nullable: true,
+  })
+  remark: string;
 
   @ManyToOne(() => BatchEntity, (batch) => batch)
   @JoinColumn({

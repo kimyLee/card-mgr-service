@@ -16,6 +16,7 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 import {
   ResponseDto,
@@ -24,18 +25,16 @@ import {
   ResPaginatedDto,
   ResponsePaginatedDto,
 } from '@/common/dto/response.dto';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
+import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 
 import { PointsService } from './points.service';
-
 import { PointEntity } from './entities/point.entity';
 
 import { CreatePointDto } from './dto/create-point.dto';
 import { UpdatePointDto } from './dto/update-point.dto';
-import { Roles } from '@/common/decorators/roles.decorator';
-import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '@/common/guards/roles.guard';
-import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
-import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 import { PointsPaginatedDto } from './dto/points-pagination.dto';
 
 @Controller('api/points')

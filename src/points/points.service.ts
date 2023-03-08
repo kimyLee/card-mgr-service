@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
-
 import { InjectRepository } from '@nestjs/typeorm';
-
 import { Like, Repository } from 'typeorm';
-
-import { PointEntity } from './entities/point.entity';
-import { CreatePointDto } from './dto/create-point.dto';
-import { UpdatePointDto } from './dto/update-point.dto';
 import { AppError } from '@/common/error/AppError';
 import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
+
+import { PointEntity } from './entities/point.entity';
+import { CreatePointDto, QueryPointsPagingEnum } from './dto/create-point.dto';
+import { UpdatePointDto } from './dto/update-point.dto';
+
 import { PointsPaginatedDto } from './dto/points-pagination.dto';
 
 @Injectable()
@@ -19,7 +18,10 @@ export class PointsService {
   ) {}
 
   async createPoint(createPointDto: CreatePointDto) {
-    return this.pointsRepository.save(createPointDto);
+    const point = new PointEntity();
+    Object.assign(point, createPointDto);
+
+    return this.pointsRepository.save(point);
   }
 
   async updatePoint(id: number, updatePointDto: UpdatePointDto) {
@@ -29,45 +31,50 @@ export class PointsService {
   /**
    * @param pointsPaginatedDto: PointsPaginatedDto
    */
-  async queryAllPoints(pointsPaginatedDto: PointsPaginatedDto): Promise<any> {
-    let findWhere: any = {};
+  async queryAllPoints(pointsPaginatedDto: PointsPaginatedDto) {
+    if (pointsPaginatedDto.paging === QueryPointsPagingEnum.YES) {
+      let findWhere: any = {};
 
-    const { search, pageSize, current } = pointsPaginatedDto;
-    if (typeof search === 'string') {
-      findWhere = [
-        {
-          id: Like(`%${search}%`),
-          ...findWhere,
+      const { search, pageSize, current } = pointsPaginatedDto;
+      if (typeof search === 'string') {
+        findWhere = [
+          {
+            point_path: Like(`%${search}%`),
+            ...findWhere,
+          },
+        ];
+      }
+
+      const [data, total] = await this.pointsRepository.findAndCount({
+        where: findWhere,
+        take: pageSize,
+        skip: (current - 1) * pageSize,
+      });
+
+      return {
+        results: data,
+        pagination: {
+          current,
+          pageSize,
+          total: total,
         },
-        // or..
-        // {
-        //   username: Like(`%${search}%`),
-        //   ...findWhere,
-        // },
-      ];
+      };
+    } else {
+      const data = await this.pointsRepository.find({
+        select: ['id', 'extent_max', 'extent_min', 'upload_status'],
+      });
+
+      return {
+        results: data,
+      };
     }
-
-    const [data, total] = await this.pointsRepository.findAndCount({
-      where: findWhere,
-      take: pageSize,
-      skip: (current - 1) * pageSize,
-    });
-
-    return {
-      results: data,
-      pagination: {
-        current,
-        pageSize,
-        total: total,
-      },
-    };
   }
 
   /**
    *
    * @param id
    */
-  queryPoint(id: number): Promise<any> {
+  queryPoint(id: number) {
     return this.pointsRepository.findOne({
       where: {
         id,
@@ -75,7 +82,7 @@ export class PointsService {
     });
   }
 
-  async deletePoint(id: number): Promise<any> {
+  async deletePoint(id: number) {
     const { affected } = await this.pointsRepository.softDelete(id);
     if (affected <= 0) {
       throw new AppError(AppErrorTypeEnum.POINT_NOT_FOUND);

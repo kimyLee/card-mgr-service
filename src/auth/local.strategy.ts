@@ -23,7 +23,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     // request: Request,  // 动态范围写法
     username: string,
     password: string,
-  ): Promise<any> {
+  ) {
     // 动态范围写法
     // const contextId = ContextIdFactory.getByRequest(request);
     // const authService = await this.moduleRef.resolve(AuthService, contextId);

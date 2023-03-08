@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
-
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 
-import { CardEntity } from './entities/card.entity';
-import { CreateCardDto } from './dto/create-card.dto';
-import { UpdateCardDto } from './dto/update-card.dto';
 import { AppError } from '@/common/error/AppError';
 import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
+
+import { CardEntity } from './entities/card.entity';
+
+import { CreateCardDto } from './dto/create-card.dto';
+import { UpdateCardDto } from './dto/update-card.dto';
 import { CardsPaginatedDto } from './dto/cards-pagination.dto';
 
 @Injectable()
@@ -18,7 +19,10 @@ export class CardsService {
   ) {}
 
   async createCard(createCardDto: CreateCardDto) {
-    return await this.cardsRepository.save(createCardDto);
+    const card = new CardEntity();
+    Object.assign(card, createCardDto);
+
+    return await this.cardsRepository.save(card);
   }
 
   async updateCard(id: number, updateCardDto: UpdateCardDto) {
@@ -28,21 +32,16 @@ export class CardsService {
   /**
    * @param cardsPaginatedDto: CardsPaginatedDto
    */
-  async queryAllCards(cardsPaginatedDto: CardsPaginatedDto): Promise<any> {
+  async queryAllCards(cardsPaginatedDto: CardsPaginatedDto) {
     let findWhere: any = {};
 
     const { search, pageSize, current } = cardsPaginatedDto;
     if (typeof search === 'string') {
       findWhere = [
         {
-          id: Like(`%${search}%`),
+          serial: Like(`%${search}%`),
           ...findWhere,
         },
-        // or..
-        // {
-        //   username: Like(`%${search}%`),
-        //   ...findWhere,
-        // },
       ];
     }
 
@@ -66,18 +65,34 @@ export class CardsService {
    *
    * @param id
    */
-  queryCard(id: number): Promise<any> {
-    return this.cardsRepository.findOne({
+  async queryCard(id: number) {
+    return await this.cardsRepository.findOne({
       where: {
         id,
       },
     });
   }
 
-  async deleteCard(id: number): Promise<any> {
+  async deleteCard(id: number) {
     const { affected } = await this.cardsRepository.softDelete(id);
     if (affected <= 0) {
       throw new AppError(AppErrorTypeEnum.CARD_NOT_FOUND);
     }
+  }
+
+  async queryGroupIp() {
+    return await this.cardsRepository
+      .createQueryBuilder('cards')
+      .select('cards.ip as ip')
+      .groupBy('cards.ip') // 等价于 .distinct(true)
+      .getRawMany();
+  }
+
+  async queryGroupSeries() {
+    return await this.cardsRepository
+      .createQueryBuilder('cards')
+      .select('cards.series as series')
+      .groupBy('cards.series') // 等价于 .distinct(true)
+      .getRawMany();
   }
 }

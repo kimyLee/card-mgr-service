@@ -33,7 +33,7 @@ export class AuthController {
     @Req() req: Request,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() _authDto: LocalAuthDto,
-  ): Promise<any> {
+  ) {
     return this.authService.login(req.user as UserEntity);
   }
 }

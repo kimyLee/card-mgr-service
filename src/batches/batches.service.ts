@@ -7,6 +7,7 @@ import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
 import { AppError } from '@/common/error/AppError';
 
 import { BatchEntity } from './entities/batch.entity';
+
 import { CreateBatchDto } from './dto/create-batch.dto';
 import { UpdateBatchDto } from './dto/update-batch.dto';
 import { BatchesPaginatedDto } from './dto/batches-pagination.dto';
@@ -19,7 +20,10 @@ export class BatchesService {
   ) {}
 
   async createBatch(createBatchDto: CreateBatchDto) {
-    return await this.batchesRepository.save(createBatchDto);
+    const batch = new BatchEntity();
+    Object.assign(batch, createBatchDto);
+
+    return await this.batchesRepository.save(batch);
   }
 
   async updateBatch(id: number, updateBatchDto: UpdateBatchDto) {
@@ -29,23 +33,16 @@ export class BatchesService {
   /**
    * @param batchesPaginatedDto: BatchesPaginatedDto
    */
-  async queryAllBatches(
-    batchesPaginatedDto: BatchesPaginatedDto,
-  ): Promise<any> {
+  async queryAllBatches(batchesPaginatedDto: BatchesPaginatedDto) {
     let findWhere: any = {};
 
     const { search, pageSize, current } = batchesPaginatedDto;
     if (typeof search === 'string') {
       findWhere = [
         {
-          id: Like(`%${search}%`),
+          batch_name: Like(`%${search}%`),
           ...findWhere,
         },
-        // or..
-        // {
-        //   username: Like(`%${search}%`),
-        //   ...findWhere,
-        // },
       ];
     }
 
@@ -69,7 +66,7 @@ export class BatchesService {
    *
    * @param id
    */
-  queryBatch(id: number): Promise<any> {
+  queryBatch(id: number) {
     return this.batchesRepository.findOne({
       where: {
         id,
@@ -77,7 +74,7 @@ export class BatchesService {
     });
   }
 
-  async deleteBatch(id: number): Promise<any> {
+  async deleteBatch(id: number) {
     const { affected } = await this.batchesRepository.softDelete(id);
     if (affected <= 0) {
       throw new AppError(AppErrorTypeEnum.BATCH_NOT_FOUND);
