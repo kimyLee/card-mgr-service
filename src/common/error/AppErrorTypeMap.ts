@@ -19,10 +19,13 @@ export const enum AppErrorTypeEnum {
   USER_FORBIDDEN,
 
   CARD_NOT_FOUND = 20001,
+  FILE_TYPE_ERROR = 20002,
+  FILE_NO_DATA = 20003,
 
   POINT_NOT_FOUND = 30001,
 
   BATCH_NOT_FOUND = 40001,
+  BATCH_EXITS = 40002,
 }
 
 /** 错误枚举 */
@@ -57,12 +60,23 @@ const AppErrorTypeMap: AppErrorType = {
     errorMessage: 'card not found',
   },
 
+  [AppErrorTypeEnum.FILE_TYPE_ERROR]: {
+    errorMessage: 'file type error',
+  },
+  [AppErrorTypeEnum.FILE_NO_DATA]: {
+    errorMessage: 'file no data',
+  },
+
   [AppErrorTypeEnum.POINT_NOT_FOUND]: {
     errorMessage: 'point not found',
   },
 
   [AppErrorTypeEnum.BATCH_NOT_FOUND]: {
     errorMessage: 'batch not found',
+  },
+
+  [AppErrorTypeEnum.BATCH_EXITS]: {
+    errorMessage: 'batch exits',
   },
 };
 

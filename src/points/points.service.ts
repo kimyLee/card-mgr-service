@@ -18,6 +18,29 @@ export class PointsService {
   ) {}
 
   async createPoint(createPointDto: CreatePointDto) {
+    // check point 区间重复
+    const points = await this.pointsRepository.find({
+      select: ['id', 'extent_max', 'extent_min', 'upload_status'],
+    });
+    if (points.length > 0) {
+      let isDuplication = false;
+      const { extent_max, extent_min } = createPointDto;
+      for (let i = 0; i < points.length; i++) {
+        if (
+          (extent_max >= points[i].extent_min &&
+            extent_max <= points[i].extent_max) ||
+          (extent_min >= points[i].extent_min &&
+            extent_min <= points[i].extent_max)
+        ) {
+          isDuplication = true;
+          break;
+        }
+      }
+      if (isDuplication) {
+        throw new Error('区间重复');
+      }
+    }
+    // save
     const point = new PointEntity();
     Object.assign(point, createPointDto);
 
@@ -25,6 +48,7 @@ export class PointsService {
   }
 
   async updatePoint(id: number, updatePointDto: UpdatePointDto) {
+    await this.queryPoint(id); // 是判断id 是否存在
     return await this.pointsRepository.update(id, updatePointDto);
   }
 
@@ -74,12 +98,17 @@ export class PointsService {
    *
    * @param id
    */
-  queryPoint(id: number) {
-    return this.pointsRepository.findOne({
+  async queryPoint(id: number) {
+    const data = await this.pointsRepository.findOne({
       where: {
         id,
       },
     });
+    if (data) {
+      return data;
+    } else {
+      throw new AppError(AppErrorTypeEnum.POINT_NOT_FOUND);
+    }
   }
 
   async deletePoint(id: number) {

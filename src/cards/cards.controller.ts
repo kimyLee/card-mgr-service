@@ -10,6 +10,8 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -17,13 +19,12 @@ import {
   ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
+  ApiResponse,
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { Express } from 'express';
-
-import * as XLSX from 'xlsx';
+import { Express, Response } from 'express';
 
 import {
   ResponseDto,
@@ -48,6 +49,7 @@ import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileUploadDto } from './dto/file-upload.dto';
+import { FileDownloadDto } from './dto/file-download.dto';
 
 @Controller('api/cards')
 @ApiTags('cards')
@@ -73,28 +75,14 @@ export class CardsController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: 'List of cards for batch',
+    // description: 'List of cards for batch',
     type: FileUploadDto,
   })
-  ImportCards(@UploadedFile() file: Express.Multer.File) {
-    console.log(file);
-
-    const workbook = XLSX.read(file.buffer, {
-      type: 'buffer',
-    });
-
-    /* Get the work sheet name */
-    const first_sheet_name = workbook.SheetNames[0];
-
-    /* Get worksheet */
-    const worksheet = workbook.Sheets[first_sheet_name];
-
-    /* Convert it to json*/
-    const xlsData = XLSX.utils.sheet_to_json(worksheet, {
-      raw: true,
-    });
-
-    return xlsData;
+  async ImportCards(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() fileUploadDto: FileUploadDto,
+  ) {
+    return this.cardsService.importCards(file, fileUploadDto);
   }
 
   @Post('/export_points')
@@ -102,9 +90,10 @@ export class CardsController {
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '导出卡牌码点' })
-  @ApiObjResponse(CardEntity)
-  ExportPoints() {
-    return;
+  // @ApiObjResponse(CardEntity)
+  @ApiResponse({ status: HttpStatus.CREATED, description: '导出xlsx' })
+  ExportPoints(@Body() fileDownloadDto: FileDownloadDto, @Res() res: Response) {
+    return this.cardsService.exportCardsWithPoint(fileDownloadDto, res);
   }
 
   @Post()

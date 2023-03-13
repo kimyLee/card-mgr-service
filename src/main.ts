@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-03-01 21:37:56
+ * @LastEditTime: 2023-03-09 20:33:54
  * @Description:
  *
  */
@@ -55,6 +55,7 @@ async function bootstrap() {
     .setTitle('card-mgr-service')
     .setDescription('卡牌管理后台')
     .setVersion('1.0.0')
+    // .addServer('http://')
     .addBearerAuth({ type: 'http', bearerFormat: 'JWT', scheme: 'bearer' })
     .build();
   const options: SwaggerDocumentOptions = {

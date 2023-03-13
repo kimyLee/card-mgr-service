@@ -19,6 +19,7 @@ export class BatchEntity extends BaseEntity {
 
   @ApiProperty({
     description: '批次名',
+    example: '第一批录入',
   })
   @Column({
     comment: '批次名',
@@ -28,6 +29,7 @@ export class BatchEntity extends BaseEntity {
 
   @ApiProperty({
     description: '卡牌数',
+    example: 56,
   })
   @Column({
     comment: '卡牌数',
@@ -36,6 +38,7 @@ export class BatchEntity extends BaseEntity {
 
   @ApiProperty({
     description: '新增卡牌数',
+    example: 55,
   })
   @Column({
     comment: '新增卡牌数',
@@ -44,6 +47,7 @@ export class BatchEntity extends BaseEntity {
 
   @ApiProperty({
     description: '复刻卡牌数',
+    example: 1,
   })
   @Column({
     comment: '复刻卡牌数',
@@ -52,6 +56,7 @@ export class BatchEntity extends BaseEntity {
 
   @ApiProperty({
     description: '备注',
+    example: '备注',
   })
   @Column({
     comment: '备注',

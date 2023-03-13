@@ -24,6 +24,7 @@ export class CardEntity extends BaseEntity {
 
   @ApiProperty({
     description: '卡牌编号',
+    example: 'NR-PR-042',
   })
   @Column({
     comment: '卡牌编号',
@@ -32,20 +33,21 @@ export class CardEntity extends BaseEntity {
 
   @ApiProperty({
     description: '卡牌名',
+    example: '火影xxxxx卡牌',
   })
   @Column({
     comment: '卡牌名',
   })
-  name: string;
+  card_name: string;
 
   @ApiProperty({
     description: '码点值',
+    example: 100535526,
   })
   @Column({
     comment: '码点值',
   })
-  point: number;
-
+  point_value: number;
   @ApiProperty({
     description: 'ip',
   })
@@ -84,9 +86,11 @@ export class CardEntity extends BaseEntity {
 
   @ApiProperty({
     description: '类型  1: 新增 ; 2: 复刻',
+    example: 1,
   })
   @Column({
     comment: '类型  1: 新增 ; 2: 复刻',
+    default: 1,
   })
   type: CardTypeEnum;
 
@@ -98,6 +102,9 @@ export class CardEntity extends BaseEntity {
     nullable: true,
   })
   remark: string;
+
+  @Column()
+  batch_id: number;
 
   @ManyToOne(() => BatchEntity, (batch) => batch)
   @JoinColumn({
