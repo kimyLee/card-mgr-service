@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
 import { AuthService } from './auth.service';
-import { UserStatusEnum } from '@/users/dto/create-user.dto';
+import { UserStatusEnum } from '@/users/types/users.type';
 import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
 import { AppError } from '@/common/error/AppError';
 

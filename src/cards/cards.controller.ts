@@ -71,36 +71,47 @@ export class CardsController {
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '导入批次卡牌' })
-  // @ApiObjResponse(CardEntity)
+  @ApiListResponse(CardEntity)
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    // description: 'List of cards for batch',
     type: FileUploadDto,
   })
-  async ImportCards(
+  async ImportCardsCreateBatch(
     @UploadedFile() file: Express.Multer.File,
     @Body() fileUploadDto: FileUploadDto,
   ) {
-    return this.cardsService.importCards(file, fileUploadDto);
+    return this.cardsService.importCardsCreateBatch(file, fileUploadDto);
+  }
+
+  @Get('/get_cards_with_batch')
+  @Roles('ADMIN')
+  @ApiSecurity('bearer')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @ApiOperation({ summary: '按批次查询卡牌' })
+  @ApiListResponse(CardEntity)
+  QueryCardsWithBatch(@Query() fileDownloadDto: FileDownloadDto) {
+    return this.cardsService.queryCardsWithBatch(fileDownloadDto);
   }
 
   @Post('/export_points')
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '导出卡牌码点' })
-  // @ApiObjResponse(CardEntity)
+  @ApiOperation({ summary: '导出批次卡牌list' })
   @ApiResponse({ status: HttpStatus.CREATED, description: '导出xlsx' })
-  ExportPoints(@Body() fileDownloadDto: FileDownloadDto, @Res() res: Response) {
-    return this.cardsService.exportCardsWithPoint(fileDownloadDto, res);
+  ExportCardsWithBatch(
+    @Query() fileDownloadDto: FileDownloadDto,
+    @Res() res: Response,
+  ) {
+    return this.cardsService.exportCardsWithBatch(fileDownloadDto, res);
   }
 
   @Post()
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '创建卡牌' }) // 超级管理员才能创建用户
+  @ApiOperation({ summary: '向某一批次追加创建卡牌' })
   @ApiObjResponse(CardEntity)
   CreateCard(@Body() createCardDto: CreateCardDto) {
     return this.cardsService.createCard(createCardDto);

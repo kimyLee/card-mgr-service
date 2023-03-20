@@ -1,8 +1,6 @@
-import { PickType } from '@nestjs/swagger';
-// import { CreatePointDto } from './create-point.dto';
+import { PickType, PartialType } from '@nestjs/swagger';
 import { PointEntity } from '../entities/point.entity';
 
-export class UpdatePointDto extends PickType(PointEntity, [
-  'point_path',
-  'upload_status',
-] as const) {}
+export class UpdatePointDto extends PartialType(
+  PickType(PointEntity, ['upload_status', 'use_count'] as const),
+) {}

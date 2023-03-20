@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-03-06 09:31:25
+ * @LastEditTime: 2023-03-19 19:25:12
  * @Description:
  *
  */
@@ -24,6 +24,8 @@ import { UsersModule } from './users/users.module';
 import { BatchesModule } from './batches/batches.module';
 import { CardsModule } from './cards/cards.module';
 import { PointsModule } from './points/points.module';
+
+import { OssModule } from './oss/oss.module';
 
 // import { ServeStaticModule } from '@nestjs/serve-static';
 // import { join } from 'path';
@@ -71,7 +73,7 @@ import { PointsModule } from './points/points.module';
     //   rootPath: join(__dirname, '..', 'client'),
     //   exclude: ['/api*'],
     // }),
-
+    OssModule,
     AuthModule,
     UsersModule,
     BatchesModule,

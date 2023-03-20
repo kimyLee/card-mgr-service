@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-02-21 15:26:05
+ * @LastEditTime: 2023-03-20 03:25:20
  * @Description:
  *
  */
@@ -32,6 +32,16 @@ export class AppService {
         autoLoadEntities: true,
         synchronize: this.config.get<boolean>('database.synchronize'),
         dropSchema: this.config.get<boolean>('database.dropSchema'),
+      },
+      oss: {
+        accessKeyId: this.config.get<string>('ossConfig.accessKeyId'),
+        accessKeySecret: this.config.get<string>('ossConfig.accessKeySecret'),
+        region: this.config.get<string>('ossConfig.region'),
+        bucket: this.config.get<string>('ossConfig.bucket'),
+      },
+      defaultAccount: {
+        username: this.config.get<string>('accountConfig.superAccountName'),
+        password: this.config.get<string>('accountConfig.superAccountPass'),
       },
     };
   }

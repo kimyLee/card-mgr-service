@@ -2,7 +2,7 @@
  * 全局过滤器 - 处理错误信息
  * @Author: hsycc
  * @Date: 2023-02-21 13:24:34
- * @LastEditTime: 2023-03-02 01:36:39
+ * @LastEditTime: 2023-03-20 15:46:31
  * @Description:
  *
  */
@@ -66,20 +66,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
     /* 自定义异常处理 */
     if (exception instanceof AppError) {
       return res.status(exception.httpStatus).json({
-        data: [],
+        data: null,
         code: exception.errorCode,
         message: exception.errorMessage,
       });
     } else if (exception instanceof UnauthorizedException) {
       /* 未授权异常 */
       return res.status(HttpStatus.OK).json({
-        data: [],
+        data: null,
         code: HttpStatus.UNAUTHORIZED,
         message: exception.message,
       });
     } else if (exception instanceof BadRequestException) {
       /* 参数验证异常, 如 `class-validator` 抛出的 */
-      return res.status(HttpStatus.OK).json({
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         data: exception.response.meta,
@@ -89,7 +89,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     } else if (exception.status === 403) {
       /* 权限验证异常 */
       return res.status(HttpStatus.OK).json({
-        data: [],
+        data: null,
         code: HttpStatus.FORBIDDEN,
         message: exception.message,
       });
@@ -104,8 +104,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       });
     } else {
       /* 其他异常 */
-      return res.status(HttpStatus.OK).json({
-        data: [],
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        data: null,
         code: HttpStatus.INTERNAL_SERVER_ERROR,
         message: exception.message ? exception.message : exception,
       });

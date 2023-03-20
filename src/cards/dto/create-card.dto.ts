@@ -2,7 +2,7 @@ import { CardEntity } from './../entities/card.entity';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 
 export class CreateCardDto extends PickType(CardEntity, [
-  'serial',
+  'case_no',
   'card_name',
   'type',
   'point_value',

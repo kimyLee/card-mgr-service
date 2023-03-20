@@ -7,10 +7,10 @@ export class FileUploadDto {
   @ApiProperty({
     description: '码点id',
   })
-  point_id?: number;
+  point_id: number;
 
   @ApiProperty({
-    description: '批次id',
+    description: '新的批次名',
   })
-  batch_id?: number;
+  batch_name: string;
 }

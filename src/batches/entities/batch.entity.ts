@@ -60,10 +60,14 @@ export class BatchEntity extends BaseEntity {
   })
   @Column({
     comment: '备注',
+    nullable: true,
   })
   remake: string;
 
-  @ManyToOne(() => PointEntity)
+  @Column()
+  point_id: number;
+
+  @ManyToOne(() => PointEntity, (point) => point)
   @JoinColumn({
     name: 'point_id',
   })

@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import * as crypto from 'crypto';
 import BaseEntity from '@/common/entities/baseEntity';
-import { RoleEnum, UserStatusEnum } from '../dto/create-user.dto';
+import { RoleEnum, UserStatusEnum } from '../types/users.type';
 
 @Entity({ name: 'users' })
 export class UserEntity extends BaseEntity {

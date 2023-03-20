@@ -8,8 +8,11 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import {
+  ApiConsumes,
   ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
@@ -36,6 +39,7 @@ import { PointEntity } from './entities/point.entity';
 import { CreatePointDto } from './dto/create-point.dto';
 import { UpdatePointDto } from './dto/update-point.dto';
 import { PointsPaginatedDto } from './dto/points-pagination.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('api/points')
 @ApiTags('points')
@@ -54,10 +58,15 @@ export class PointsController {
   @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '创建码点区域' })
   @ApiObjResponse(PointEntity)
-  createPoint(@Body() createPointDto: CreatePointDto) {
-    return this.pointsService.createPoint(createPointDto);
+  createPoint(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createPointDto: CreatePointDto,
+  ) {
+    return this.pointsService.createPoint(createPointDto, file);
   }
 
   @Patch(':id')
@@ -102,5 +111,15 @@ export class PointsController {
   })
   DeletePoint(@Param('id') id: string) {
     return this.pointsService.deletePoint(+id);
+  }
+
+  @Get('test/:id')
+  @Roles('ADMIN')
+  @ApiSecurity('bearer')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @ApiOperation({ summary: '测试' })
+  @ApiObjResponse(PointEntity)
+  TestCard() {
+    return this.pointsService.test();
   }
 }

@@ -7,17 +7,17 @@ import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
 import { AppError } from '@/common/error/AppError';
 
 import { UserEntity } from './entities/user.entity';
+import { RoleEnum, UserStatusEnum } from './types/users.type';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { RoleEnum, UserStatusEnum } from './dto/create-user.dto';
 import { UsersPaginatedDto } from './dto/users-pagination.dto';
 @Injectable()
 export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
-    private configService: ConfigService,
+    private config: ConfigService,
   ) {}
   onModuleInit() {
     this.createInitSuperUser();
@@ -37,12 +37,8 @@ export class UsersService implements OnModuleInit {
 
   /** 创建初始超级管理用户 */
   async createInitSuperUser() {
-    const username = this.configService.get<string>(
-      'accountConfig.superAccountName',
-    );
-    const password = this.configService.get<string>(
-      'accountConfig.superAccountPass',
-    );
+    const username = this.config.get<string>('accountConfig.superAccountName');
+    const password = this.config.get<string>('accountConfig.superAccountPass');
     const user = await this.findOneByUserName(username);
     if (!user) {
       const user = new UserEntity();
@@ -105,7 +101,7 @@ export class UsersService implements OnModuleInit {
    *
    * @param id 用户的ID
    */
-  queryUser(id: number) {
+  async queryUser(id: number) {
     return this.usersRepository.findOne({
       where: {
         id,
@@ -175,7 +171,7 @@ export class UsersService implements OnModuleInit {
     }
   }
 
-  findOneByUserName(username: string) {
+  async findOneByUserName(username: string) {
     return this.usersRepository.findOne({
       select: ['password_hash', 'username', 'id', 'status', 'role'],
       where: { username },

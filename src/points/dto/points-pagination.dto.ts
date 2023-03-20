@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { PaginatedDto } from '@/common/dto/pagination.dto';
-import { QueryPointsPagingEnum } from './create-point.dto';
+import { QueryPointsPagingEnum } from '../types/point.type';
 export class PointsPaginatedDto extends PartialType(PaginatedDto) {
   @ApiProperty({
     description: '模糊搜索',

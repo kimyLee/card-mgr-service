@@ -21,12 +21,17 @@ export class BatchesService {
     private readonly pointsService: PointsService,
   ) {}
 
-  async createBatch(createBatchDto: CreateBatchDto) {
-    const isExits = await this.findBatchByBatchName(createBatchDto.batch_name);
-    if (isExits) {
-      throw new AppError(AppErrorTypeEnum.BATCH_EXITS);
+  async createBatch(
+    createBatchDto: CreateBatchDto,
+    point = null,
+    skipCheck = false,
+  ) {
+    if (!skipCheck) {
+      await this.checkBatchExitsByNameReturnBatch(createBatchDto.batch_name);
     }
-    const point = await this.pointsService.queryPoint(createBatchDto.point_id);
+
+    point =
+      point || (await this.pointsService.queryPoint(createBatchDto.point_id));
     const batch = new BatchEntity();
     batch.point = point;
 
@@ -37,10 +42,8 @@ export class BatchesService {
   }
 
   async updateBatch(id: number, updateBatchDto: UpdateBatchDto) {
-    const isExits = await this.findBatchByBatchName(updateBatchDto.batch_name);
-    if (isExits) {
-      throw new AppError(AppErrorTypeEnum.BATCH_EXITS);
-    }
+    await this.checkBatchExitsByNameReturnBatch(updateBatchDto.batch_name);
+
     return await this.batchesRepository.update(id, updateBatchDto);
   }
 
@@ -96,11 +99,15 @@ export class BatchesService {
     }
   }
 
-  async findBatchByBatchName(batchName: string) {
-    return await this.batchesRepository.findOne({
+  async checkBatchExitsByNameReturnBatch(batch_name: string) {
+    const batch = await this.batchesRepository.findOne({
       where: {
-        batch_name: batchName,
+        batch_name,
       },
     });
+
+    if (batch) {
+      throw new AppError(AppErrorTypeEnum.BATCH_EXITS);
+    }
   }
 }

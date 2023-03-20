@@ -1,14 +1,16 @@
-import { PointEntity } from '@/points/entities/point.entity';
-import { BatchEntity } from '@/batches/entities/batch.entity';
-import { BatchesService } from './../batches/batches.service';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 
+import { PointEntity } from '@/points/entities/point.entity';
+import { BatchEntity } from '@/batches/entities/batch.entity';
+import { CardEntity } from './entities/card.entity';
+
+import { BatchesService } from '@/batches/batches.service';
+import { PointsService } from '@/points/points.service';
+
 import { CardsService } from './cards.service';
 import { CardsController } from './cards.controller';
-import { CardEntity } from './entities/card.entity';
-import { PointsService } from '@/points/points.service';
 
 @Module({
   imports: [

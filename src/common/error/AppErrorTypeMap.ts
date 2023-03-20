@@ -19,13 +19,22 @@ export const enum AppErrorTypeEnum {
   USER_FORBIDDEN,
 
   CARD_NOT_FOUND = 20001,
-  FILE_TYPE_ERROR = 20002,
-  FILE_NO_DATA = 20003,
+
+  XLSX_TYPE_ERROR,
+  XLSX_NO_DATA,
+  XLSX_DATA_MORE_THEN_POINT_UPLOAD_COUNT,
+
+  ZIP_TYPE_ERROR,
+  ZIP_NO_DATA,
 
   POINT_NOT_FOUND = 30001,
+  POINT_EXTENT_DUPLICATION = 30002,
 
   BATCH_NOT_FOUND = 40001,
-  BATCH_EXITS = 40002,
+  BATCH_EXITS,
+  BATCH_NOT_CARDS,
+
+  OSS_RES_ERROR = 90000,
 }
 
 /** 错误枚举 */
@@ -53,30 +62,53 @@ const AppErrorTypeMap: AppErrorType = {
   },
 
   [AppErrorTypeEnum.USER_FORBIDDEN]: {
-    errorMessage: 'use forbidden',
+    errorMessage: 'User forbidden',
   },
 
   [AppErrorTypeEnum.CARD_NOT_FOUND]: {
-    errorMessage: 'card not found',
+    errorMessage: 'Card not found',
   },
 
-  [AppErrorTypeEnum.FILE_TYPE_ERROR]: {
-    errorMessage: 'file type error',
+  [AppErrorTypeEnum.XLSX_TYPE_ERROR]: {
+    errorMessage: 'Not xlsx',
   },
-  [AppErrorTypeEnum.FILE_NO_DATA]: {
-    errorMessage: 'file no data',
+  [AppErrorTypeEnum.XLSX_NO_DATA]: {
+    errorMessage: 'Empty xlsx',
+  },
+
+  [AppErrorTypeEnum.XLSX_DATA_MORE_THEN_POINT_UPLOAD_COUNT]: {
+    errorMessage: '导入的批次卡牌数量超过该码点库剩余可分配的码点文件',
+  },
+
+  [AppErrorTypeEnum.ZIP_TYPE_ERROR]: {
+    errorMessage: 'Not zip',
+  },
+  [AppErrorTypeEnum.ZIP_NO_DATA]: {
+    errorMessage: 'Empty zip',
   },
 
   [AppErrorTypeEnum.POINT_NOT_FOUND]: {
-    errorMessage: 'point not found',
+    errorMessage: 'Point not found',
+  },
+
+  [AppErrorTypeEnum.POINT_EXTENT_DUPLICATION]: {
+    errorMessage: 'Point extent duplication',
   },
 
   [AppErrorTypeEnum.BATCH_NOT_FOUND]: {
-    errorMessage: 'batch not found',
+    errorMessage: 'Batch not found',
   },
 
   [AppErrorTypeEnum.BATCH_EXITS]: {
-    errorMessage: 'batch exits',
+    errorMessage: 'Batch exits',
+  },
+
+  [AppErrorTypeEnum.BATCH_NOT_CARDS]: {
+    errorMessage: 'Batch not have cards',
+  },
+
+  [AppErrorTypeEnum.OSS_RES_ERROR]: {
+    errorMessage: 'OSS response error',
   },
 };
 

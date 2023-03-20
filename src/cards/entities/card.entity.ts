@@ -9,11 +9,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import BaseEntity from '@/common/entities/baseEntity';
 
 import { BatchEntity } from '@/batches/entities/batch.entity';
+import { CardTypeEnum } from '../types/cards.type';
 
-export enum CardTypeEnum {
-  NEW_ADD = 1,
-  REPRINT = 2,
-}
 @Entity({ name: 'cards' })
 export class CardEntity extends BaseEntity {
   @ApiProperty({
@@ -29,7 +26,7 @@ export class CardEntity extends BaseEntity {
   @Column({
     comment: '卡牌编号',
   })
-  serial: string;
+  case_no: string;
 
   @ApiProperty({
     description: '卡牌名',
@@ -48,6 +45,7 @@ export class CardEntity extends BaseEntity {
     comment: '码点值',
   })
   point_value: number;
+
   @ApiProperty({
     description: 'ip',
   })
