@@ -1,6 +1,5 @@
-import { PointEntity } from '@/points/entities/point.entity';
-import { PointsService } from './../points/points.service';
-import { Module } from '@nestjs/common';
+import { PointsModule } from '@/points/points.module';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 
@@ -10,11 +9,12 @@ import { BatchEntity } from './entities/batch.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BatchEntity, PointEntity]),
+    forwardRef(() => PointsModule),
+    TypeOrmModule.forFeature([BatchEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [BatchesController],
-  providers: [BatchesService, PointsService],
+  providers: [BatchesService],
   exports: [BatchesService],
 })
 export class BatchesModule {}

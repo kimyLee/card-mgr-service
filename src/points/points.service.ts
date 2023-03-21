@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { v4 as uuidV4 } from 'uuid';
@@ -14,16 +14,20 @@ import { CreatePointDto } from './dto/create-point.dto';
 import { UpdatePointDto } from './dto/update-point.dto';
 import { PointsPaginatedDto } from './dto/points-pagination.dto';
 
-// import * as fs from 'fs';
 import * as AdmZip from 'adm-zip';
+import { BatchesService } from '@/batches/batches.service';
 
 const zipContentType = 'application/zip';
 
 @Injectable()
 export class PointsService {
   constructor(
+    @Inject(forwardRef(() => BatchesService))
+    private readonly batchesService: BatchesService,
+
     @InjectRepository(PointEntity)
     private readonly pointsRepository: Repository<PointEntity>,
+
     private readonly ossService: OssService,
   ) {}
 
@@ -83,15 +87,14 @@ export class PointsService {
     // 创建 oss prefix
     const point_path = uuidV4();
 
-    /**
-     * 批量上传oss
-     * TODO: 文件重名
-     * 性能优化 队列
-     *
-     * */
+    // 批量上传oss
+    // TODO: 性能优化 队列
     const ossRes = await Promise.all(
-      zipEntries.map((v) =>
-        this.ossService.putBuffer(point_path + '/' + v.name, v.getData()),
+      zipEntries.map((v, i) =>
+        this.ossService.putBuffer(
+          point_path + '/' + (i + 1) + '.tif',
+          v.getData(),
+        ),
       ),
     );
 
@@ -177,9 +180,7 @@ export class PointsService {
         },
       };
     } else {
-      const data = await this.pointsRepository.find({
-        select: ['id', 'extent_max', 'extent_min', 'upload_status'],
-      });
+      const data = await this.pointsRepository.find();
 
       return {
         results: data,
@@ -205,6 +206,7 @@ export class PointsService {
   }
 
   async deletePoint(id: number) {
+    // TODO: checkout 是否关联批次
     const { affected } = await this.pointsRepository.softDelete(id);
     if (affected <= 0) {
       throw new AppError(AppErrorTypeEnum.POINT_NOT_FOUND);

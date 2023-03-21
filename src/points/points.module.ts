@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { BatchesModule } from '@/batches/batches.module';
+import { Module, forwardRef } from '@nestjs/common';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
@@ -9,6 +10,7 @@ import { PointEntity } from './entities/point.entity';
 
 @Module({
   imports: [
+    forwardRef(() => BatchesModule),
     TypeOrmModule.forFeature([PointEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],

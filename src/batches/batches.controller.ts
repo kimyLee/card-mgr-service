@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Query,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import {
   ApiExtraModels,
@@ -49,7 +51,10 @@ import { BatchesPaginatedDto } from './dto/batches-pagination.dto';
   ResponsePaginatedDto,
 )
 export class BatchesController {
-  constructor(private readonly batchesService: BatchesService) {}
+  constructor(
+    @Inject(forwardRef(() => BatchesService))
+    private readonly batchesService: BatchesService,
+  ) {}
 
   @Post()
   @Roles('ADMIN')

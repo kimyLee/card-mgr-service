@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-03-19 19:25:12
+ * @LastEditTime: 2023-03-21 20:23:43
  * @Description:
  *
  */
@@ -76,9 +76,9 @@ import { OssModule } from './oss/oss.module';
     OssModule,
     AuthModule,
     UsersModule,
+    PointsModule,
     BatchesModule,
     CardsModule,
-    PointsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

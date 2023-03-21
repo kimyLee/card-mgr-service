@@ -1,5 +1,5 @@
 import { PointsService } from './../points/points.service';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 // import { ConfigService } from '@nestjs/config';
 import { Like, Repository } from 'typeorm';
@@ -16,9 +16,11 @@ import { BatchesPaginatedDto } from './dto/batches-pagination.dto';
 @Injectable()
 export class BatchesService {
   constructor(
+    @Inject(forwardRef(() => PointsService))
+    private readonly pointsService: PointsService,
+
     @InjectRepository(BatchEntity)
     private readonly batchesRepository: Repository<BatchEntity>,
-    private readonly pointsService: PointsService,
   ) {}
 
   async createBatch(
@@ -93,6 +95,8 @@ export class BatchesService {
   }
 
   async deleteBatch(id: number) {
+    // TODO: 删除对应该批次的所有卡牌
+    // checkout 对应 point的 数据, 回滚
     const { affected } = await this.batchesRepository.softDelete(id);
     if (affected <= 0) {
       throw new AppError(AppErrorTypeEnum.BATCH_NOT_FOUND);
