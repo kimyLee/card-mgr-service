@@ -27,5 +27,11 @@
   },
   "commentTranslate.source": "Google",
   "commentTranslate.targetLanguage": "zh-CN",
-  "cSpell.words": ["officedocument", "openxmlformats", "spreadsheetml"]
+  "cSpell.words": [
+    "Myśliwiec",
+    "nestframework",
+    "officedocument",
+    "openxmlformats",
+    "spreadsheetml"
+  ]
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-03-06 07:45:01
+ * @LastEditTime: 2023-03-22 04:19:56
  * @Description:
  *
  */
@@ -20,7 +20,7 @@ export class AppController {
   @ApiOkResponse({
     type: ResponseDto,
   })
-  app_info(): string {
+  app_info() {
     return process.env.NODE_ENV !== 'production'
       ? this.appService.getDebugInfo()
       : '';

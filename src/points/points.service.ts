@@ -136,16 +136,12 @@ export class PointsService {
     };
   }
 
-  async updatePoint(
-    id: number,
-    updatePointDto: UpdatePointDto,
-    skipCheck = false,
-  ) {
-    if (!skipCheck) {
-      await this.queryPoint(id); // 是判断id 是否存在
-    }
+  async updatePoint(id: number, updatePointDto: UpdatePointDto) {
+    const { affected } = await this.pointsRepository.update(id, updatePointDto);
 
-    return await this.pointsRepository.update(id, updatePointDto);
+    if (affected <= 0) {
+      throw new AppError(AppErrorTypeEnum.POINT_NOT_FOUND);
+    }
   }
 
   /**
@@ -206,24 +202,12 @@ export class PointsService {
   }
 
   async deletePoint(id: number) {
-    // TODO: checkout 是否关联批次
+    //  checkout 是否关联批次
+    await this.batchesService.checkPointBindBatch(id);
+
     const { affected } = await this.pointsRepository.softDelete(id);
     if (affected <= 0) {
       throw new AppError(AppErrorTypeEnum.POINT_NOT_FOUND);
     }
-  }
-
-  async test() {
-    // const res = await this.ossService.putOssFile(
-    //   'test/1111_pbh_3x3.tif',
-    //   './upload/1_pbh_3x3.tif',
-    // );
-    // console.log(res);
-    // const res = fs.readdirSync('./');
-    // console.log(res);
-
-    const res = await this.ossService.listFiles();
-
-    return res;
   }
 }

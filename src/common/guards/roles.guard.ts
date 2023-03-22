@@ -6,7 +6,7 @@
  *
  * @Author: hsycc
  * @Date: 2023-02-21 13:24:34
- * @LastEditTime: 2023-03-20 15:26:35
+ * @LastEditTime: 2023-03-22 04:54:31
  * @Description:
  *
  */
@@ -23,13 +23,16 @@ export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const role = this.reflector.get<string>('role', context.getHandler());
-    if (!role) {
+    const roles = this.reflector.get<string[]>('role', context.getHandler());
+
+    if (!roles) {
       return true;
     }
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    return RoleEnum[role] === user.role;
+    const active = roles.some((role: string) => RoleEnum[role] === user.role);
+
+    return active;
   }
 }

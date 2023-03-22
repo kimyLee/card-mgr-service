@@ -51,7 +51,6 @@ export class CardEntity extends BaseEntity {
   })
   @Column({
     comment: 'ip',
-    nullable: true,
   })
   ip: string;
 
@@ -60,7 +59,6 @@ export class CardEntity extends BaseEntity {
   })
   @Column({
     comment: '系列',
-    nullable: true,
   })
   series: string;
 
@@ -69,7 +67,6 @@ export class CardEntity extends BaseEntity {
   })
   @Column({
     comment: '弹数',
-    nullable: true,
   })
   amount: string;
 
@@ -77,10 +74,17 @@ export class CardEntity extends BaseEntity {
     description: '码点链接',
   })
   @Column({
-    comment: '码点链接',
-    nullable: true,
+    comment: '码点链接，${point.point_path}/${batch_id}/${index}.tif',
   })
   point_url: string;
+
+  @ApiProperty({
+    description: '原始码点链接，',
+  })
+  @Column({
+    comment: '原始码点链接，${point.point_path}/${index}.tif',
+  })
+  original_point_url: string;
 
   @ApiProperty({
     description: '类型  1: 新增 ; 2: 复刻',

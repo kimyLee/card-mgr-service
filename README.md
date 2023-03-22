@@ -69,7 +69,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 Nest is [MIT licensed](LICENSE).
 
-# Git
+## git 提交规范
 
 - feat - 新功能 feature
 - fix - 修复 bug
@@ -82,6 +82,19 @@ Nest is [MIT licensed](LICENSE).
 - revert - 回退
 - build - 打包
 
-# Web 多线程开发利器 Comlink 的剖析与思考
+## Web 多线程开发利器 Comlink 的剖析与思考
 
-https://www.cnblogs.com/cangqinglang/p/15791367.html
+<https://www.cnblogs.com/cangqinglang/p/15791367.html>
+
+## 一些开发技巧
+
+```js
+// PartialType 函数返回一个类型（类），并将所有输入类型设置为可选的
+// PickType 功能从一个输入类型中选择一部分属性来创建一个新类型（类）
+// OmitType()函数从一个输入类型中取出所有属性然后移除一些键。
+// IntersectionType()函数将两种类型组合成一个新类型（类）
+```
+
+## TODO
+
+- [x] swagger apiResponse 支持多种结构

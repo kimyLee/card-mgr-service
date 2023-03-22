@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
   Query,
   forwardRef,
@@ -28,7 +27,6 @@ import {
   ResponseObjDto,
   ResponsePaginatedDto,
 } from '@/common/dto/response.dto';
-import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
@@ -57,20 +55,18 @@ export class BatchesController {
   ) {}
 
   @Post()
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '创建' })
+  @ApiOperation({ summary: 'BETA: 创建空批次' })
   @ApiObjResponse(BatchEntity)
   CreateBatch(@Body() createBatchDto: CreateBatchDto) {
     return this.batchesService.createBatch(createBatchDto);
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '更新' })
+  @ApiOperation({ summary: '更新批次' })
   @ApiOkResponse({
     type: ResponseDto,
   })
@@ -79,34 +75,29 @@ export class BatchesController {
   }
 
   @Get()
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '获取列表' })
+  @ApiOperation({ summary: '分页获取批次列表' })
   @ApiPaginatedResponse(BatchEntity)
   QueryAllCards(@Query() batchesPaginatedDto: BatchesPaginatedDto) {
     return this.batchesService.queryAllBatches(batchesPaginatedDto);
   }
 
-  @Get(':id')
-  @Roles('ADMIN')
+  @Get('get_batches_group')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '获取单个信息' })
+  @ApiOperation({ summary: '获取 批次 group' })
+  @ApiPaginatedResponse(BatchEntity)
+  QueryGroupBatches() {
+    return this.batchesService.queryGroupBatches();
+  }
+
+  @Get(':id')
+  @ApiSecurity('bearer')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @ApiOperation({ summary: '获取单个批次信息' })
   @ApiObjResponse(BatchEntity)
   QueryCard(@Param('id') id: string) {
     return this.batchesService.queryBatch(+id);
-  }
-
-  @Delete(':id')
-  @Roles('ADMIN')
-  @ApiSecurity('bearer')
-  @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '软删除单个' })
-  @ApiOkResponse({
-    type: ResponseDto,
-  })
-  DeleteBatch(@Param('id') id: string) {
-    return this.batchesService.deleteBatch(+id);
   }
 }

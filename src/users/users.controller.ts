@@ -72,7 +72,7 @@ export class UserController {
   }
 
   @Get()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'USER') // 等价于不设置 @Roles
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取用户列表' })
@@ -82,7 +82,6 @@ export class UserController {
   }
 
   @Get(':id')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '查找用户' })

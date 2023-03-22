@@ -28,7 +28,6 @@ import {
   ResPaginatedDto,
   ResponsePaginatedDto,
 } from '@/common/dto/response.dto';
-import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
@@ -55,7 +54,6 @@ export class PointsController {
   constructor(private readonly pointsService: PointsService) {}
 
   @Post()
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @UseInterceptors(FileInterceptor('file'))
@@ -70,7 +68,6 @@ export class PointsController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '更新码点区域' })
@@ -82,7 +79,6 @@ export class PointsController {
   }
 
   @Get()
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取码点列表' })
@@ -92,7 +88,6 @@ export class PointsController {
   }
 
   @Get(':id')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取码点信息' })
@@ -102,24 +97,15 @@ export class PointsController {
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '软删除单个' })
+  @ApiOperation({
+    summary: '软删除, 关联了批次的码点库需要删除对应关联的批次才能删除',
+  })
   @ApiOkResponse({
     type: ResponseDto,
   })
   DeletePoint(@Param('id') id: string) {
     return this.pointsService.deletePoint(+id);
-  }
-
-  @Get('test/:id')
-  @Roles('ADMIN')
-  @ApiSecurity('bearer')
-  @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '测试' })
-  @ApiObjResponse(PointEntity)
-  TestCard() {
-    return this.pointsService.test();
   }
 }

@@ -23,20 +23,11 @@ export class BatchesService {
     private readonly batchesRepository: Repository<BatchEntity>,
   ) {}
 
-  async createBatch(
-    createBatchDto: CreateBatchDto,
-    point = null,
-    skipCheck = false,
-  ) {
-    if (!skipCheck) {
-      await this.checkBatchExitsByNameReturnBatch(createBatchDto.batch_name);
-    }
-
-    point =
-      point || (await this.pointsService.queryPoint(createBatchDto.point_id));
+  async createBatch(createBatchDto: CreateBatchDto) {
+    await this.checkBatchExitsByNameReturnBatch(createBatchDto.batch_name);
+    const point = await this.pointsService.queryPoint(createBatchDto.point_id);
     const batch = new BatchEntity();
     batch.point = point;
-
     delete createBatchDto.point_id;
     Object.assign(batch, createBatchDto);
 
@@ -44,9 +35,17 @@ export class BatchesService {
   }
 
   async updateBatch(id: number, updateBatchDto: UpdateBatchDto) {
+    // check batch_name exits
     await this.checkBatchExitsByNameReturnBatch(updateBatchDto.batch_name);
 
-    return await this.batchesRepository.update(id, updateBatchDto);
+    const { affected } = await this.batchesRepository.update(
+      id,
+      updateBatchDto,
+    );
+
+    if (affected <= 0) {
+      throw new AppError(AppErrorTypeEnum.BATCH_NOT_FOUND);
+    }
   }
 
   /**
@@ -82,27 +81,36 @@ export class BatchesService {
     };
   }
 
+  async queryGroupBatches() {
+    return await this.batchesRepository.find({
+      select: ['batch_name', 'id'],
+    });
+  }
+
   /**
    *
    * @param id
    */
   async queryBatch(id: number) {
-    return await this.batchesRepository.findOne({
+    const batch = await this.batchesRepository.findOne({
       where: {
         id,
       },
     });
+    if (!batch) {
+      throw new AppError(AppErrorTypeEnum.BATCH_NOT_FOUND);
+    }
+    return batch;
   }
 
   async deleteBatch(id: number) {
-    // TODO: 删除对应该批次的所有卡牌
-    // checkout 对应 point的 数据, 回滚
     const { affected } = await this.batchesRepository.softDelete(id);
     if (affected <= 0) {
       throw new AppError(AppErrorTypeEnum.BATCH_NOT_FOUND);
     }
   }
 
+  // check 批次名是否存在
   async checkBatchExitsByNameReturnBatch(batch_name: string) {
     const batch = await this.batchesRepository.findOne({
       where: {
@@ -112,6 +120,19 @@ export class BatchesService {
 
     if (batch) {
       throw new AppError(AppErrorTypeEnum.BATCH_EXITS);
+    }
+  }
+
+  // check 码点库是否关联了批次信息
+  async checkPointBindBatch(point_id) {
+    const batch = await this.batchesRepository.findOne({
+      where: {
+        point_id,
+      },
+    });
+
+    if (batch) {
+      throw new AppError(AppErrorTypeEnum.POINT_BIND_BATCH);
     }
   }
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-03-21 20:23:43
+ * @LastEditTime: 2023-03-22 15:03:47
  * @Description:
  *
  */
@@ -27,8 +27,8 @@ import { PointsModule } from './points/points.module';
 
 import { OssModule } from './oss/oss.module';
 
-// import { ServeStaticModule } from '@nestjs/serve-static';
-// import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -69,16 +69,17 @@ import { OssModule } from './oss/oss.module';
     WinstonModule.forRoot(loggerOptions),
 
     /* 静态资源目录 */
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(__dirname, '..', 'client'),
-    //   exclude: ['/api*'],
-    // }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client'),
+      exclude: ['/api*'],
+    }),
     OssModule,
     AuthModule,
     UsersModule,
     PointsModule,
     BatchesModule,
     CardsModule,
+    OssModule,
   ],
   controllers: [AppController],
   providers: [AppService],

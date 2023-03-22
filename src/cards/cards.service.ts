@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Like, Repository, Connection } from 'typeorm';
 import * as XLSX from 'xlsx';
 import { Response } from 'express';
 import * as promise from 'bluebird';
@@ -9,7 +9,9 @@ import * as promise from 'bluebird';
 import { AppError } from '@/common/error/AppError';
 import { AppErrorTypeEnum } from '@/common/error/AppErrorTypeMap';
 
+import { OssService } from '@/oss/oss.service';
 import { PointsService } from '@/points/points.service';
+import { PointEntity } from '@/points/entities/point.entity';
 import { BatchEntity } from '@/batches/entities/batch.entity';
 import { BatchesService } from '@/batches/batches.service';
 
@@ -31,14 +33,15 @@ export class CardsService {
     private readonly cardsRepository: Repository<CardEntity>,
     private readonly batchesService: BatchesService,
     private readonly pointsService: PointsService,
+    private readonly ossService: OssService,
     private readonly config: ConfigService,
+    private connection: Connection,
   ) {}
 
   /**
    *  导入批次卡牌
-   *  TODO:  处理 excel 的原始数据 check 数据合法
+   *  处理 excel 的原始数据, check 数据合法
    *  判断数据库是否存储过, 有则变更卡牌类型为复刻卡 √
-   *  请求第三方 api  X 不需要
    *
    */
   async importCardsCreateBatch(
@@ -50,6 +53,8 @@ export class CardsService {
     );
 
     const point = await this.pointsService.queryPoint(fileUploadDto.point_id);
+
+    // check point exits
     const batch = new BatchEntity();
 
     batch.point = point;
@@ -88,7 +93,7 @@ export class CardsService {
     // const region = this.config.get<string>('ossConfig.region');
     // const bucket = this.config.get<string>('ossConfig.bucket');
 
-    const newData = await promise.map(
+    const newData: CardEntity[] = await promise.map(
       xlsData,
       async (v, i) => {
         const card = new CardEntity();
@@ -111,10 +116,10 @@ export class CardsService {
           point_value: v['码点值'],
           type,
           // http://${region}.${bucket}.aliyuncs.com/
-          // http://test-code-card.oss-cn-hongkong.aliyuncs.com/e88e6485-f53f-40de-9eb8-d696ac726c73/3_pbh_3x3.tif
-          point_url: `${point.point_path}/${
+          // http://test-code-card.oss-cn-hongkong.aliyuncs.com/
+          original_point_url: `${point.point_path}/${
             i + 1 + point.use_count
-          }_pbh_3x3.tif`,
+          }.tif`,
         };
       },
       // { concurrency: 5 },
@@ -135,21 +140,49 @@ export class CardsService {
       batch_name: fileUploadDto.batch_name,
     });
 
-    const newBatch = await this.batchesService.createBatch(batch, point, true);
+    // 获取连接并创建新的 queryRunner
 
-    newData.map((v) => (v.batch = newBatch));
+    const queryRunner = this.connection.createQueryRunner();
 
-    const res = await this.cardsRepository.save(newData);
+    await queryRunner.connect();
 
-    await this.pointsService.updatePoint(
-      point.id,
-      {
-        use_count: point.use_count, // 更新 point 已分配给卡牌的数量
-      },
-      true,
-    );
+    await queryRunner.startTransaction();
 
-    return res;
+    try {
+      batch.point = point;
+
+      const newBatch = await queryRunner.manager.save(batch);
+
+      await promise.map(newData, async (v) => {
+        v.batch = newBatch;
+
+        // await copy oss file copy
+        const ossReplaceUrl = `${point.point_path}/${newBatch.id}/${v.case_no}.tif`;
+        await this.ossService.copy(v.original_point_url, ossReplaceUrl);
+
+        v.point_url = ossReplaceUrl;
+      });
+
+      //  更新 point 已分配给卡牌的数量
+      await queryRunner.manager.update(PointEntity, batch.point_id, {
+        use_count: point.use_count, //
+      });
+
+      // save cardsEntity[]
+      await queryRunner.manager.save(CardEntity, newData);
+
+      await queryRunner.commitTransaction();
+
+      return newBatch;
+    } catch (err) {
+      // 有错误做出回滚更改
+      console.log(err);
+
+      await queryRunner.rollbackTransaction();
+      throw new AppError(AppErrorTypeEnum.CARD_IMPORT_BATCH_FAIL);
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   /**
@@ -208,36 +241,10 @@ export class CardsService {
       )}_${Date.now()}.xlsx`,
     });
     res.status(HttpStatus.CREATED).end(output);
-
-    // or
-    // return output;
-  }
-
-  /**
-   * 向某一批次追加创建卡牌
-   * @param createCardDto: CreateCardDto
-   * TODO: 更新 batch 状态, point 状态
-   */
-  async createCard(createCardDto: CreateCardDto) {
-    const batch = await this.batchesService.queryBatch(createCardDto.batch_id);
-    if (!batch) {
-      throw new AppError(AppErrorTypeEnum.BATCH_NOT_FOUND);
-    }
-    const card = new CardEntity();
-    delete createCardDto.batch_id;
-    card.batch = batch;
-    Object.assign(card, createCardDto);
-
-    return await this.cardsRepository.save(card);
-  }
-
-  async updateCard(id: number, updateCardDto: UpdateCardDto) {
-    return await this.cardsRepository.update(id, updateCardDto);
   }
 
   /**
    * @param cardsPaginatedDto: CardsPaginatedDto
-   * TODO: 条件筛选
    */
   async queryAllCards(cardsPaginatedDto: CardsPaginatedDto) {
     let findWhere: any = {};
@@ -279,8 +286,6 @@ export class CardsService {
       ];
     }
 
-    // return findWhere;
-
     const [data, total] = await this.cardsRepository.findAndCount({
       relations: ['batch', 'batch.point'],
       where: findWhere,
@@ -310,13 +315,6 @@ export class CardsService {
     });
   }
 
-  async deleteCard(id: number) {
-    const { affected } = await this.cardsRepository.softDelete(id);
-    if (affected <= 0) {
-      throw new AppError(AppErrorTypeEnum.CARD_NOT_FOUND);
-    }
-  }
-
   async queryGroupIp() {
     return await this.cardsRepository
       .createQueryBuilder('cards')
@@ -340,4 +338,102 @@ export class CardsService {
       },
     });
   }
+
+  /**
+   * 向某一批次追加创建卡牌
+   * @param createCardDto: CreateCardDto
+   * TODO: 更新 batch 状态, point 状态
+   */
+  async createCard(createCardDto: CreateCardDto) {
+    const batch = await this.batchesService.queryBatch(createCardDto.batch_id);
+    const card = new CardEntity();
+    delete createCardDto.batch_id;
+    card.batch = batch;
+    Object.assign(card, createCardDto);
+
+    return await this.cardsRepository.save(card);
+  }
+
+  async updateCard(id: number, updateCardDto: UpdateCardDto) {
+    return await this.cardsRepository.update(id, updateCardDto);
+  }
+
+  // TODO: 更新 batch 状态, point 状态
+  async deleteCard(id: number) {
+    const { affected } = await this.cardsRepository.softDelete(id);
+    if (affected <= 0) {
+      throw new AppError(AppErrorTypeEnum.CARD_NOT_FOUND);
+    }
+  }
+
+  /**
+   * 软删除批次以及批次下所有卡牌, 重置 point.useCount
+   */
+  async deleteBatchWithCards(batch_id: number) {
+    // 获取连接并创建新的 queryRunner
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+
+    await queryRunner.startTransaction();
+
+    const batchCardsCount = await queryRunner.manager.countBy(CardEntity, {
+      batch_id,
+    });
+
+    const batch = await queryRunner.manager.findOneBy(BatchEntity, {
+      id: batch_id,
+    });
+
+    if (!batch) {
+      throw new AppError(AppErrorTypeEnum.BATCH_NOT_FOUND);
+    }
+
+    // 查询对应码点库
+    // 等价于 const point = await queryRunner.manager.findOneBy(PointEntity, { id: batch.point_id, });
+    batch.point = await queryRunner.manager
+      .createQueryBuilder()
+      .relation(BatchEntity, 'point')
+      .of(batch)
+      .loadOne();
+
+    if (!batch.point) {
+      throw new AppError(AppErrorTypeEnum.POINT_NOT_FOUND);
+    }
+
+    // return batch;
+
+    try {
+      // 对此事务执行一些操作
+
+      // 重置 point, useCount
+      await queryRunner.manager.update(PointEntity, batch.point_id, {
+        use_count: batch.point.use_count - batchCardsCount,
+      });
+
+      // 删除该批次所有卡牌
+      await queryRunner.manager.softDelete(CardEntity, { batch_id });
+
+      // 删除批次
+      await queryRunner.manager.softDelete(BatchEntity, { id: batch_id });
+
+      // 删除 对应 oss/point/batch_id/*.tif 先保留
+      // await this.ossService.deletePrefix(
+      //   `${batch.point.point_path}/${batch.id}/`,
+      // );
+
+      // 提交事务：
+      await queryRunner.commitTransaction();
+
+      //
+    } catch (err) {
+      // 有错误做出回滚更改
+      await queryRunner.rollbackTransaction();
+      throw new AppError(AppErrorTypeEnum.CARD_DELETE_BATCH_FAIL);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  //
 }

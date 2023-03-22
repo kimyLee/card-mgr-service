@@ -23,7 +23,6 @@ export class BatchEntity extends BaseEntity {
   })
   @Column({
     comment: '批次名',
-    unique: true,
   })
   batch_name: string;
 

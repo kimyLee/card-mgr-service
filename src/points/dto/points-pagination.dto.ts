@@ -10,7 +10,7 @@ export class PointsPaginatedDto extends PartialType(PaginatedDto) {
 
   @ApiProperty({
     description: '是否分页',
-    example: QueryPointsPagingEnum.NO,
+    example: QueryPointsPagingEnum.YES,
     default: QueryPointsPagingEnum.YES,
   })
   public paging?: QueryPointsPagingEnum;

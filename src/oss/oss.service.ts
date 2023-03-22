@@ -81,8 +81,7 @@ export class OssService {
         url,
       };
     } catch (err) {
-      // throw new AppError(AppErrorTypeEnum.OSS_RES_ERROR);
-      return err;
+      throw new AppError(AppErrorTypeEnum.OSS_RES_ERROR);
     }
   }
 
@@ -119,6 +118,15 @@ export class OssService {
       } else {
         return null;
       }
+    } catch (err) {
+      throw new AppError(AppErrorTypeEnum.OSS_RES_ERROR);
+    }
+  }
+
+  // 在同一个Bucket中拷贝文件。
+  async copy(sourceName: string, targeName: string) {
+    try {
+      return await this.client.copy(targeName, sourceName);
     } catch (err) {
       throw new AppError(AppErrorTypeEnum.OSS_RES_ERROR);
     }
@@ -170,5 +178,9 @@ export class OssService {
     } else {
       return await this.putOssFile(ossPath, localPath);
     }
+  }
+
+  test() {
+    return this.listFiles();
   }
 }

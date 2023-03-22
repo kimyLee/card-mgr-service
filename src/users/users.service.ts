@@ -59,7 +59,7 @@ export class UsersService implements OnModuleInit {
     });
     const user = new UserEntity();
     Object.assign(user, userInfo, updatePasswordDto);
-    await this.usersRepository.update(userId, user);
+    return await this.usersRepository.update(userId, user);
   }
 
   /**
@@ -130,7 +130,7 @@ export class UsersService implements OnModuleInit {
     }
     const user = new UserEntity();
     Object.assign(user, userInfo);
-    await this.usersRepository.update(id, user);
+    return await this.usersRepository.update(id, user);
   }
 
   async updateUserStatus(id: number) {
@@ -155,7 +155,7 @@ export class UsersService implements OnModuleInit {
     }
     const user = new UserEntity();
     Object.assign(user, userInfo);
-    await this.usersRepository.update(id, user);
+    return await this.usersRepository.update(id, user);
   }
 
   async deleteUser(id: number, userId: number) {

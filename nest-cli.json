@@ -8,7 +8,15 @@
       {
         "name": "@nestjs/swagger/plugin"
       }
-    ]
+    ],
+    "assets": [
+      {
+        "include": "../client/",
+        "outDir": "dist/client/"
+      }
+    ],
+
+    "watchAssets": true
   },
   "generateOptions": {
     "spec": false

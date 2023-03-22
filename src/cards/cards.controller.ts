@@ -1,3 +1,4 @@
+import { BatchEntity } from '@/batches/entities/batch.entity';
 import {
   Controller,
   Get,
@@ -33,7 +34,6 @@ import {
   ResPaginatedDto,
   ResponsePaginatedDto,
 } from '@/common/dto/response.dto';
-import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { ApiPaginatedResponse } from '@/common/decorators/api-paginated-response.decorator';
 import { ApiObjResponse } from '@/common/decorators/api-obj-response.decorator';
@@ -67,11 +67,10 @@ export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 
   @Post('/import_cards')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '导入批次卡牌' })
-  @ApiListResponse(CardEntity)
+  @ApiObjResponse(BatchEntity)
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -85,7 +84,6 @@ export class CardsController {
   }
 
   @Get('/get_cards_with_batch')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '按批次查询卡牌' })
@@ -95,10 +93,9 @@ export class CardsController {
   }
 
   @Post('/export_points')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '导出批次卡牌list' })
+  @ApiOperation({ summary: '导出批次卡牌xlsx' })
   @ApiResponse({ status: HttpStatus.CREATED, description: '导出xlsx' })
   ExportCardsWithBatch(
     @Query() fileDownloadDto: FileDownloadDto,
@@ -107,18 +104,7 @@ export class CardsController {
     return this.cardsService.exportCardsWithBatch(fileDownloadDto, res);
   }
 
-  @Post()
-  @Roles('ADMIN')
-  @ApiSecurity('bearer')
-  @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '向某一批次追加创建卡牌' })
-  @ApiObjResponse(CardEntity)
-  CreateCard(@Body() createCardDto: CreateCardDto) {
-    return this.cardsService.createCard(createCardDto);
-  }
-
   @Get('get_ip_group')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取 ip group' })
@@ -128,7 +114,6 @@ export class CardsController {
   }
 
   @Get('get_series_group')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取 series group' })
@@ -138,17 +123,15 @@ export class CardsController {
   }
 
   @Get()
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '获取卡牌列表' })
+  @ApiOperation({ summary: '分页获取卡牌列表' })
   @ApiPaginatedResponse(CardEntity)
   QueryAllCards(@Query() cardsPaginatedDto: CardsPaginatedDto) {
     return this.cardsService.queryAllCards(cardsPaginatedDto);
   }
 
   @Get(':id')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '获取卡牌信息' })
@@ -158,7 +141,6 @@ export class CardsController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
   @ApiOperation({ summary: '更新卡牌信息' })
@@ -169,27 +151,34 @@ export class CardsController {
     return this.cardsService.updateCard(+id, updateCardDto);
   }
 
-  @Patch('/partner/:id')
-  @Roles('ADMIN')
+  @Post()
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '从合作方更新卡牌信息，接口待定' })
-  @ApiOkResponse({
-    type: ResponseDto,
-  })
-  UpdateCardFormPartner(@Param('id') id: string) {
-    // return this.cardsService.updateCard(+id, updateCardDto);
+  @ApiOperation({ summary: 'BETA: 向某一批次追加创建卡牌, 创建单张卡牌慎用' })
+  @ApiObjResponse(CardEntity)
+  CreateCard(@Body() createCardDto: CreateCardDto) {
+    return this.cardsService.createCard(createCardDto);
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
   @ApiSecurity('bearer')
   @UseGuards(AuthGuard(), RolesGuard)
-  @ApiOperation({ summary: '软删除单个' })
+  @ApiOperation({ summary: 'BETA: 软删除单个卡牌, 慎用' })
   @ApiOkResponse({
     type: ResponseDto,
   })
   DeleteCard(@Param('id') id: string) {
     return this.cardsService.deleteCard(+id);
+  }
+
+  @Delete('delete_batch/:batch_id')
+  @ApiSecurity('bearer')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @ApiOperation({ summary: '软删除批次以及批次下所有卡牌' })
+  @ApiOkResponse({
+    type: ResponseDto,
+  })
+  DeleteBatchWithCards(@Param('batch_id') batch_id: string) {
+    return this.cardsService.deleteBatchWithCards(+batch_id);
   }
 }

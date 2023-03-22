@@ -19,6 +19,8 @@ export const enum AppErrorTypeEnum {
   USER_FORBIDDEN,
 
   CARD_NOT_FOUND = 20001,
+  CARD_DELETE_BATCH_FAIL,
+  CARD_IMPORT_BATCH_FAIL,
 
   XLSX_TYPE_ERROR,
   XLSX_NO_DATA,
@@ -29,6 +31,7 @@ export const enum AppErrorTypeEnum {
 
   POINT_NOT_FOUND = 30001,
   POINT_EXTENT_DUPLICATION = 30002,
+  POINT_BIND_BATCH,
 
   BATCH_NOT_FOUND = 40001,
   BATCH_EXITS,
@@ -69,6 +72,14 @@ const AppErrorTypeMap: AppErrorType = {
     errorMessage: 'Card not found',
   },
 
+  [AppErrorTypeEnum.CARD_DELETE_BATCH_FAIL]: {
+    errorMessage: 'Delete batch with cards fail',
+  },
+
+  [AppErrorTypeEnum.CARD_IMPORT_BATCH_FAIL]: {
+    errorMessage: 'Import cards create batch fail',
+  },
+
   [AppErrorTypeEnum.XLSX_TYPE_ERROR]: {
     errorMessage: 'Not xlsx',
   },
@@ -93,6 +104,10 @@ const AppErrorTypeMap: AppErrorType = {
 
   [AppErrorTypeEnum.POINT_EXTENT_DUPLICATION]: {
     errorMessage: 'Point extent duplication',
+  },
+
+  [AppErrorTypeEnum.POINT_BIND_BATCH]: {
+    errorMessage: 'Point bind batch, can not removed',
   },
 
   [AppErrorTypeEnum.BATCH_NOT_FOUND]: {

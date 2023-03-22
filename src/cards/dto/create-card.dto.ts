@@ -31,6 +31,11 @@ export class CreateCardDto extends PickType(CardEntity, [
   point_url?: string;
 
   @ApiProperty({
+    description: '原始码点链接',
+  })
+  original_point_url?: string;
+
+  @ApiProperty({
     description: '备注',
     example: '备注',
   })
