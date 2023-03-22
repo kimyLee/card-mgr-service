@@ -84,16 +84,46 @@ Nest is [MIT licensed](LICENSE).
 
 ## Web 多线程开发利器 Comlink 的剖析与思考
 
-<https://www.cnblogs.com/cangqinglang/p/15791367.html>
+<>
 
-## 一些开发技巧
+## 开发
 
-```js
-// PartialType 函数返回一个类型（类），并将所有输入类型设置为可选的
-// PickType 功能从一个输入类型中选择一部分属性来创建一个新类型（类）
-// OmitType()函数从一个输入类型中取出所有属性然后移除一些键。
-// IntersectionType()函数将两种类型组合成一个新类型（类）
+- 权限控制
+
+  @Role 装饰器修饰, 默认不限制
+
+  @Roles('ADMIN') only asset ADMIN
+
+  @Roles('USER') only asset USER
+
+  @Roles('USER', 'ADMIN') bath asset USER && ADMIN
+
+```users.controller.ts
+  @Post()
+  @Roles('ADMIN')
+  @ApiSecurity('bearer')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @ApiOperation({ summary: '创建用户' }) // 超级管理员才能创建用户
+  @ApiObjResponse(UserEntity)
+  CreateUser(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.createUser(createUserDto);
+  }
+
 ```
+
+- dto 继承
+
+```md
+PartialType 函数返回一个类型（类），并将所有输入类型设置为可选的
+PickType 功能从一个输入类型中选择一部分属性来创建一个新类型（类）
+OmitType()函数从一个输入类型中取出所有属性然后移除一些键。
+IntersectionType()函数将两种类型组合成一个新类型（类）
+
+可以组合使用
+```
+
+- [基于 Comlink 前端多线程下载实现]('https://github.com/hsycc/comlink-ts-demo/tree/main')
+  参考 https://www.cnblogs.com/cangqinglang/p/15791367.html
 
 ## TODO
 
