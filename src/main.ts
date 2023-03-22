@@ -1,7 +1,7 @@
 /*
  * @Author: hsycc
  * @Date: 2023-02-21 11:07:06
- * @LastEditTime: 2023-03-09 20:33:54
+ * @LastEditTime: 2023-03-22 18:53:57
  * @Description:
  *
  */
@@ -41,14 +41,14 @@ async function bootstrap() {
   /* 设置 `Winston.logger` 日志为Nest的日志, 这样才能打印出系统初始化时的日志 */
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
-  /* 将Nestjs作为静态资源 */
-  app.useStaticAssets(
-    join(
-      __dirname,
-      process.env.NODE_ENV === 'production' ? './' : '../',
-      'public',
-    ),
-  );
+  // /*  ServeStaticModule 替代 将Nestjs作为静态资源 */
+  // app.useStaticAssets(
+  //   join(
+  //     __dirname,
+  //     process.env.NODE_ENV === 'production' ? './' : '../',
+  //     'public',
+  //   ),
+  // );
 
   /* Swagger */
   const config = new DocumentBuilder()
